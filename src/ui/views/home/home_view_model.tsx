@@ -1,13 +1,8 @@
 import type { Link as LinkModel } from '../../../domain/models/link';
 import { RoutePaths } from '../../routing/routes';
-import LinkCard from '../../components/link_card';
 
-/**
- * Home — the top-level navigation hub. Mirrors the Flutter home screen: a grid
- * of cards linking to each section of the guide. The page title is rendered by
- * the shared RootLayout.
- */
-const items: LinkModel[] = [
+// Defining items inside the hook function body means the array is recreated on every render. For a static constant that never changes, this is pure waste.
+const NAV_ITEMS: readonly LinkModel[] = [
     {
         title: 'React fundamentals',
         route: RoutePaths.reactFundamentals,
@@ -97,14 +92,6 @@ const items: LinkModel[] = [
     },
 ];
 
-export default function HomeView() {
-    return (
-        <div className="flex flex-col gap-lg p-lg">
-            <nav className="grid grid-cols-1 gap-md pb-md sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((item) => (
-                    <LinkCard key={item.route} item={item} />
-                ))}
-            </nav>
-        </div>
-    );
+export function useHomeViewModel() {
+    return { NAV_ITEMS };
 }

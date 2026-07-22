@@ -6,16 +6,16 @@ import {
 } from 'react-router';
 import { RoutePaths } from './routes';
 import { RootLayout } from '../components/root-layout';
-import HomeView from '../views/home/home';
-import ReactFundamentalsView from '../views/react_fundamentals/react-fundamentals';
-import TsJsFundamentalsView from '../views/ts_js_fundamentals/ts-js-fundamentals';
-import LayoutStructureView from '../views/ui_hub/sub_views/layout_structure/layout-structure';
-import CssView from '../views/ui_hub/sub_views/css/css';
-import BootstrapView from '../views/ui_hub/sub_views/bootstrap/bootstrap';
-import TailwindView from '../views/ui_hub/sub_views/tailwind/tailwind';
-import InteractiveView from '../views/ui_hub/sub_views/interactive/interactive';
-import UiHubView from '../views/ui_hub/ui-hub';
-import { PlaceholderView } from '../views/placeholder/_placeholder';
+import HomeView from '../views/home/home_view';
+import ReactFundamentalsView from '../views/react_fundamentals/react_fundamentals_view';
+import TsJsFundamentalsView from '../views/ts_js_fundamentals/ts_js_fundamentals_view';
+import LayoutStructureView from '../views/ui_hub/sub_views/layout_structure/layout_structure_view';
+import CssView from '../views/ui_hub/sub_views/css/css_view';
+import BootstrapView from '../views/ui_hub/sub_views/bootstrap/bootstrap_view';
+import TailwindView from '../views/ui_hub/sub_views/tailwind/tailwind_view';
+import InteractiveView from '../views/ui_hub/sub_views/interactive/interactive_view';
+import UiHubView from '../views/ui_hub/ui_hub_view';
+import { PlaceholderView } from '../views/placeholder/placeholder_view';
 
 /**
  * Route table as data — mirrors the Flutter `router.dart` GoRouter config.

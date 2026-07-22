@@ -24,7 +24,7 @@
     - Hierarchy + spacing: section title (accent bar + semibold) → ContentGroupWrapper overline label (uppercase, muted) → TextBlock body (leading-[1.7], on-surface-variant). Sections mb-lg apart; quiet header (surface + hairline border, accent only on logo); home rebuilt as clean white cards on gray canvas.
     - RULE for all screens going forward: every demonstrable concept ships a VISIBLE, interactive example (local function wrapped in <Example/>), not just a CodeBlock description; and verify the rendered screen by screenshotting (dev server + `playwright`) before marking done.
 
-- A fix related to design system implementation:
+- A fix related to design system implementation (Pending):
     - I asked another AI that in my coding, for text, fonts, etc my css classes are a little complicated, and replied like below, I am not sure if that way if fine or not, you can decide:
     - Question asked with AI
         - I also see that text, etc are used like this in my css, not sure if it's fine or something not done properly
@@ -124,3 +124,4 @@
         - Implement evironment screen explaining how it's done in react (Pending)
     - Best practices screen (Pending)
         - Explaining how things are done in best way in react for performance, efficiency, maintainance, etc
+    - Drawer (Pending)
