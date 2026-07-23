@@ -126,10 +126,10 @@ font-family, size, and weight.`}
                 <CodeBlock
                     language="tsx"
                     code={`<div className="flex flex-col gap-md p-md">  {/* layout + spacing */}
-  <h2 className="text-[var(--text-title-lg)] font-medium text-on-surface">
+  <h2 className="text-title-lg font-medium text-on-surface">
     Heading
   </h2>
-  <p className="text-[var(--text-body)] text-on-surface-variant leading-relaxed">
+  <p className="text-body text-on-surface-variant leading-relaxed">
     Body text in a muted color.
   </p>
   <div className="rounded-md border border-outline bg-surface-tint p-sm">
@@ -138,12 +138,31 @@ font-family, size, and weight.`}
 </div>`}
                 />
             </ContentGroupWrapper>
-            <ContentGroupWrapper title="Arbitrary values with [ ]">
+            <ContentGroupWrapper title="Tokens are first-class; reserve [ ] for true one-offs">
                 <TextBlock>
-                    {`When the scale doesn't have what you need, use an arbitrary value in
-brackets — text-[var(--text-title)], w-[320px], grid-cols-[1fr_2fr]. This app
-uses text-[var(--text-title)] etc. to read font-size tokens directly.`}
+                    {`Every design token lives in the @theme inline block in index.css under
+its proper namespace (--color-*, --text-*, --font-*, --spacing-*, --radius-*,
+--shadow-*), so Tailwind generates a real utility for it. Write the utility —
+text-body, font-mono, bg-primary — never the raw variable.
+
+The bracket escape text-[var(--text-caption)] is a code smell here: it signals a
+token that was never registered under its namespace. The rule of thumb — if
+[var(-- appears in JSX, a token is missing from @theme inline.
+
+Use the [ ] arbitrary syntax only for genuine one-off values with no token
+behind them: w-[320px], h-[44px], grid-cols-[1fr_2fr], leading-[1.7].`}
                 </TextBlock>
+                <CodeBlock
+                    language="tsx"
+                    code={`// ✅ token is registered under --text-* → first-class utility
+<p className="text-caption font-mono text-on-surface-variant" />
+
+// ✅ genuine one-off pixel value, no token exists
+<button className="h-[44px] w-[110px] rounded-md" />
+
+// 🚫 smell — token exists, just wasn't registered; register it instead
+<p className="text-[var(--text-caption)]" />`}
+                />
             </ContentGroupWrapper>
         </SectionWrapper>
     );
@@ -170,7 +189,7 @@ breakpoints: sm 640, md 768, lg 1024, xl 1280, 2xl 1536.`}
 </nav>
 
 // One element, behavior changes with width:
-<h1 className="text-[var(--text-title)] md:text-[var(--text-title-lg)]">
+<h1 className="text-title md:text-title-lg">
   Grows at md
 </h1>`}
                 />
@@ -195,7 +214,7 @@ function ResponsiveDemo() {
             {['one', 'two', 'three', 'four', 'five', 'six'].map((t) => (
                 <div
                     key={t}
-                    className="rounded-md border border-outline bg-surface-tint p-md text-center text-[var(--text-body-sm)] text-on-surface-variant"
+                    className="rounded-md border border-outline bg-surface-tint p-md text-center text-body-sm text-on-surface-variant"
                 >
                     {t}
                 </div>

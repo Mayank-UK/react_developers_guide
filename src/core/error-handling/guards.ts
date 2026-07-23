@@ -12,11 +12,12 @@ import {
   CacheFailure,
   DatabaseFailure,
   Failure,
+  FailureSeverity,
   NetworkFailure,
   ServerFailure,
   UnknownFailure,
 } from './failures';
-import { failed, type Failed, type Result, type Success } from '../result';
+import { failed, type Failed, type Result } from '../result';
 import type { Logger } from '../config/logger';
 
 /**
@@ -80,21 +81,21 @@ export function responseToException(
   cause?: unknown,
 ): AppException {
   const status = response.status;
-  const data = response.data;
+  const data: unknown = response.data;
 
   if (status === 401 || status === 403) {
     return new AuthException(`Authentication failed (${status})`, { cause });
   }
 
-  const serverMessage =
+  const rawMessage =
     typeof data === 'object' && data !== null
-      ? ((data as Record<string, unknown>).message as string | undefined)
+      ? (data as Record<string, unknown>).message
       : undefined;
+  const serverMessage = typeof rawMessage === 'string' ? rawMessage : undefined;
 
-  return new ServerException(
-    serverMessage ?? `Server returned ${status}`,
-    { cause },
-  );
+  return new ServerException(serverMessage ?? `Server returned ${status}`, {
+    cause,
+  });
 }
 
 /** Recursively map an AppException to a Failure, preserving the cause chain. */
@@ -139,7 +140,7 @@ export async function safeRepositoryCall<TResult>({
 }: SafeRepositoryCallOptions<TResult>): Promise<Result<TResult>> {
   try {
     const value = await call();
-    return { ok: true, value } as Success<TResult>;
+    return { ok: true, value };
   } catch (e) {
     if (e instanceof NetworkException) {
       if (onNetworkError) return onNetworkError(e);
@@ -161,17 +162,17 @@ export async function safeRepositoryCall<TResult>({
   }
 }
 
-/** Convenience: a Result representing a cache miss that should surface the network failure. */
-export function forwardNetworkFailure(
-  cause: NetworkException,
-): Failed {
+/** Convenience: a Result representing a cache miss that should surface the upstream failure. */
+export function forwardNetworkFailure(cause: AppException): Failed {
   return failed(mapExceptionToFailure(cause));
 }
 
-/** Used by the cache fallback: chain a CacheFailure on top of an existing failure. */
+/** Used by the cache fallback: chain a CacheFailure on top of an upstream
+ *  failure. Marked Critical because the cache was the last resort and it
+ *  failed — there is nothing left to show the user. */
 export function chainedCacheFailure(
   dbError: AppDatabaseException,
-  networkFailure: Failure,
+  upstream: Failure,
 ): Failed {
-  return failed(new CacheFailure(dbError.message, networkFailure));
+  return failed(new CacheFailure(dbError.message, upstream, FailureSeverity.Critical));
 }

@@ -1,27 +1,13 @@
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { RouterProvider } from 'react-router';
 import { ThemeProvider } from '../../../../design-system/theme-provider';
-import { container } from '../../../../../core/container';
-import { createAppConfig } from '../../../../../core/config';
 import { createAppRouter } from '../../../../routing/router';
 
 /**
  * Smoke + interaction test for the CSS screen: headings render and the custom
  * property demo propagates a token change to both tiles.
  */
-beforeAll(() => {
-    if (!window.matchMedia) {
-        window.matchMedia = () =>
-            ({
-                matches: false,
-                addEventListener() {},
-                removeEventListener() {},
-            }) as unknown as MediaQueryList;
-    }
-    container.initialize(createAppConfig());
-});
-
 describe('CSS screen', () => {
     it('renders the section headings', async () => {
         const router = createAppRouter(['/ui/styling/css']);
@@ -75,7 +61,7 @@ describe('CSS screen', () => {
         const tiles = screen.getAllByTestId('cp-tile');
         expect(tiles).toHaveLength(2);
         // initial hue = primary
-        expect(tiles[0].style.backgroundColor).toBe('var(--demo-color)');
+        expect(tiles[0]!.style.backgroundColor).toBe('var(--demo-color)');
 
         fireEvent.click(screen.getByText('warning'));
         expect(screen.getByText(/--demo-color =/).textContent).toContain(

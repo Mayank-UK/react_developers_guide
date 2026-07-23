@@ -1,9 +1,7 @@
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router';
 import { ThemeProvider } from '../../design-system/theme-provider';
-import { container } from '../../../core/container';
-import { createAppConfig } from '../../../core/config';
 import { createAppRouter } from '../../routing/router';
 
 /**
@@ -12,19 +10,6 @@ import { createAppRouter } from '../../routing/router';
  * white-screen runtime errors that type-checking can't catch (broken context
  * wiring, container init, layout/outlet wiring, router config, etc.).
  */
-beforeAll(() => {
-    // jsdom has no matchMedia; ThemeProvider guards for it, but be explicit.
-    if (!window.matchMedia) {
-        window.matchMedia = () =>
-            ({
-                matches: false,
-                addEventListener() {},
-                removeEventListener() {},
-            }) as unknown as MediaQueryList;
-    }
-    container.initialize(createAppConfig());
-});
-
 describe('App / Home', () => {
     it('renders the shared layout title and the navigation grid', async () => {
         const router = createAppRouter(['/']);
@@ -34,14 +19,17 @@ describe('App / Home', () => {
             </ThemeProvider>,
         );
 
-        // The data router resolves the initial route asynchronously.
+        // The data router resolves the initial route asynchronously, and the
+        // view itself is lazy-loaded (Suspense), so wait for its content.
         await waitFor(() => {
             expect(
                 screen.getAllByText("React developer's guide").length,
             ).toBeGreaterThanOrEqual(1);
         });
-        // A representative nav card is present.
-        expect(screen.getByText('React fundamentals')).toBeInTheDocument();
+        // Representative nav cards are present once the home chunk loads.
+        await waitFor(() =>
+            expect(screen.getByText('React fundamentals')).toBeInTheDocument(),
+        );
         expect(screen.getByText('API handling')).toBeInTheDocument();
     });
 });

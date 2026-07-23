@@ -17,7 +17,6 @@ export class AuthTokenInterceptor {
     instance.interceptors.request.use((config) => {
       const token = this.getToken();
       if (token) {
-        config.headers = config.headers ?? {};
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;

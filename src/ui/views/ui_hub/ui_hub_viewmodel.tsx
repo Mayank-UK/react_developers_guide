@@ -31,6 +31,16 @@ const NAV_ITEMS: readonly LinkModel[] = [
         route: RoutePaths.interactive,
         description: 'Hover, focus, active, transitions, animations.',
     },
+    {
+        title: 'Responsive layout',
+        route: RoutePaths.responsive,
+        description: 'Mobile-first, breakpoints, container queries, useMediaQuery.',
+    },
+    {
+        title: 'Design system',
+        route: RoutePaths.designSystem,
+        description: 'Tokens (color/type/spacing/radius/shadow), @theme inline, light/dark.',
+    },
 ];
 
 export function useUiHubViewModel() {

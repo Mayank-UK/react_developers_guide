@@ -14,13 +14,38 @@ export interface PostDTO {
   body: string;
 }
 
-/** Deserialize a JSON object (from the API or IndexedDB) into a PostDTO. */
+/**
+ * Deserialize a JSON object (from the API or IndexedDB) into a PostDTO.
+ *
+ * Validates the payload rather than coercing: a malformed post (non-numeric id,
+ * non-string title/body, NaN, etc.) throws, so bad server data or cache
+ * corruption surfaces as a typed exception (ServerException from the remote
+ * source via guardedApiCall; AppDatabaseException from the DAO's catch) instead
+ * of propagating `NaN` ids or "[object Object]" titles into the UI.
+ */
 export function postDtoFromJson(json: Record<string, unknown>): PostDTO {
-  return {
-    id: Number(json.id),
-    title: String(json.title ?? ''),
-    body: String(json.body ?? ''),
-  };
+  const { id, title, body } = json;
+
+  if (typeof id !== 'number' || !Number.isInteger(id)) {
+    throw new Error(
+      `Invalid post: id must be an integer, got ${describe(id)}`,
+    );
+  }
+  if (typeof title !== 'string') {
+    throw new Error(`Invalid post ${id}: title must be a string, got ${describe(title)}`);
+  }
+  if (typeof body !== 'string') {
+    throw new Error(`Invalid post ${id}: body must be a string, got ${describe(body)}`);
+  }
+
+  return { id, title, body };
+}
+
+/** Human-readable type name for a validation error message. */
+function describe(value: unknown): string {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  return typeof value;
 }
 
 /** Serialize a PostDTO to a plain JSON object (for IndexedDB persistence). */

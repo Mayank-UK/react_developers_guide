@@ -26,8 +26,16 @@ export class Logger {
   private log(level: LogLevel, message: string, error?: unknown): void {
     if (LEVEL_PRIORITY[level] < this.minPriority) return;
     const tag = `[${this.name}] ${level.toUpperCase()}: ${message}`;
-    if (error !== undefined) console.log(tag, error);
-    else console.log(tag);
+    // Route by severity so browser tooling / log aggregators can filter:
+    // warnings to console.warn, errors to console.error.
+    const fn =
+      level === 'error'
+        ? console.error
+        : level === 'warning'
+          ? console.warn
+          : console.log;
+    if (error !== undefined) fn(tag, error);
+    else fn(tag);
   }
 
   debug(message: string): void {

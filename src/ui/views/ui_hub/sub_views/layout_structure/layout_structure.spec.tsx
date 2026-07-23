@@ -1,27 +1,13 @@
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { RouterProvider } from 'react-router';
 import { ThemeProvider } from '../../../../design-system/theme-provider';
-import { container } from '../../../../../core/container';
-import { createAppConfig } from '../../../../../core/config';
 import { createAppRouter } from '../../../../routing/router';
 
 /**
  * Smoke + interaction test for the Layout & structure screen: renders the
  * headings and drives the flex direction + grid column toggles.
  */
-beforeAll(() => {
-    if (!window.matchMedia) {
-        window.matchMedia = () =>
-            ({
-                matches: false,
-                addEventListener() {},
-                removeEventListener() {},
-            }) as unknown as MediaQueryList;
-    }
-    container.initialize(createAppConfig());
-});
-
 describe('Layout & structure screen', () => {
     it('renders the section headings', async () => {
         const router = createAppRouter(['/ui/layout']);
@@ -70,7 +56,7 @@ describe('Layout & structure screen', () => {
 
         await waitFor(() => screen.getByText('The box model'));
 
-        const container = screen.getByTestId('grid-container') as HTMLElement;
+        const container = screen.getByTestId('grid-container');
         expect(
             (container.style.gridTemplateColumns || '').includes('(3,'),
         ).toBe(true);

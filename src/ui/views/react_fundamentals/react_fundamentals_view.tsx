@@ -192,10 +192,10 @@ function Profile({ name, role, online }: ProfileProps) {
                 aria-hidden
             />
             <div>
-                <p className="text-[var(--text-body)] font-medium text-on-surface">
+                <p className="text-body font-medium text-on-surface">
                     {name}
                 </p>
-                <p className="text-[var(--text-caption)] text-on-surface-variant">
+                <p className="text-caption text-on-surface-variant">
                     {role}
                 </p>
             </div>
@@ -276,11 +276,11 @@ function CounterDemo() {
             <button
                 type="button"
                 onClick={() => setCount((c) => c - 1)}
-                className="rounded-md border border-outline px-md py-xs text-[var(--text-body)] text-on-surface hover:bg-surface-variant"
+                className="rounded-md border border-outline px-md py-xs text-body text-on-surface hover:bg-surface-variant"
             >
                 −
             </button>
-            <span className="min-w-[2ch] text-center text-[var(--text-title)] font-medium tabular-nums text-on-surface">
+            <span className="min-w-[2ch] text-center text-title font-medium tabular-nums text-on-surface">
                 {count}
             </span>
             <button
@@ -294,7 +294,7 @@ function CounterDemo() {
             <button
                 type="button"
                 onClick={() => setCount(0)}
-                className="rounded-md border border-outline px-sm py-xs text-[var(--text-caption)] text-on-surface-variant hover:bg-surface-variant"
+                className="rounded-md border border-outline px-sm py-xs text-caption text-on-surface-variant hover:bg-surface-variant"
             >
                 reset
             </button>
@@ -349,18 +349,18 @@ function ControlledInputDemo() {
     const [q, setQ] = useState('');
     return (
         <div className="flex flex-col gap-xs">
-            <label className="text-[var(--text-caption)] text-on-surface-variant">
+            <label className="text-caption text-on-surface-variant">
                 Type something
             </label>
             <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="controlled input"
-                className="w-full max-w-[320px] rounded-md border border-outline bg-surface px-sm py-xs text-[var(--text-body)] text-on-surface outline-none focus:border-[var(--color-primary)]"
+                className="w-full max-w-[320px] rounded-md border border-outline bg-surface px-sm py-xs text-body text-on-surface outline-none focus:border-primary"
             />
-            <p className="text-[var(--text-body-sm)] text-on-surface-variant">
+            <p className="text-body-sm text-on-surface-variant">
                 You typed: <span className="text-on-surface">{q || '—'}</span>{' '}
-                <span className="text-[var(--text-caption)]">
+                <span className="text-caption">
                     ({q.length} chars)
                 </span>
             </p>
@@ -421,11 +421,11 @@ function ConditionalDemo() {
                 {on ? 'Hide' : 'Show'} message
             </button>
             {on ? (
-                <span className="rounded-md bg-surface-tint px-sm py-xs text-[var(--text-body-sm)] text-on-surface">
+                <span className="rounded-md bg-surface-tint px-sm py-xs text-body-sm text-on-surface">
                     ✅ The message is visible.
                 </span>
             ) : (
-                <span className="text-[var(--text-body-sm)] text-on-surface-variant">
+                <span className="text-body-sm text-on-surface-variant">
                     (nothing rendered)
                 </span>
             )}
@@ -504,7 +504,7 @@ function ListDemo() {
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && add()}
                     placeholder="Add a task…"
-                    className="flex-1 rounded-md border border-outline bg-surface px-sm py-xs text-[var(--text-body)] text-on-surface outline-none focus:border-[var(--color-primary)]"
+                    className="flex-1 rounded-md border border-outline bg-surface px-sm py-xs text-body text-on-surface outline-none focus:border-primary"
                 />
                 <button
                     type="button"
@@ -521,13 +521,13 @@ function ListDemo() {
                         key={t.id}
                         className="flex items-center justify-between rounded-md border border-outline px-sm py-xs"
                     >
-                        <span className="text-[var(--text-body-sm)] text-on-surface">
+                        <span className="text-body-sm text-on-surface">
                             {t.label}
                         </span>
                         <button
                             type="button"
                             onClick={() => remove(t.id)}
-                            className="rounded-sm px-xs text-[var(--text-caption)] text-on-surface-variant hover:bg-black/5"
+                            className="rounded-sm px-xs text-caption text-on-surface-variant hover:bg-black/5"
                         >
                             remove
                         </button>
@@ -607,10 +607,10 @@ exactly the primitives covered here.`}
                         key={c.label}
                         className="flex flex-wrap items-center gap-sm rounded-md border border-outline px-sm py-xs"
                     >
-                        <span className="text-[var(--text-body-sm)] font-medium text-on-surface">
+                        <span className="text-body-sm font-medium text-on-surface">
                             {c.label}
                         </span>
-                        <span className="text-[var(--text-caption)] text-on-surface-variant">
+                        <span className="text-caption text-on-surface-variant">
                             — {c.note}
                         </span>
                     </div>

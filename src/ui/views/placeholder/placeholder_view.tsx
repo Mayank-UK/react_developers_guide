@@ -12,7 +12,7 @@ interface PlaceholderViewProps {
 export function PlaceholderView({ phase, children }: PlaceholderViewProps) {
   return (
     <div className="rounded-lg border border-dashed border-outline p-lg text-center">
-      <p className="text-[var(--text-body)] text-on-surface-variant">
+      <p className="text-body text-on-surface-variant">
         {phase ? `Coming in ${phase}. ` : ''}
         The architecture foundation is in place — this screen's content lands in
         a later milestone.

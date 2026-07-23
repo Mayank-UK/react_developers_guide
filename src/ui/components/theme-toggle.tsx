@@ -9,7 +9,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="rounded-md px-sm py-xxs text-[var(--text-body)] text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"
+      className="rounded-md px-sm py-xxs text-body text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"
       aria-label={`Switch to ${mode === 'dark' ? 'light' : 'dark'} theme`}
       title={`Switch to ${mode === 'dark' ? 'light' : 'dark'} theme`}
     >

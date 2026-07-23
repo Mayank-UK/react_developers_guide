@@ -1,22 +1,8 @@
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RouterProvider } from 'react-router';
 import { ThemeProvider } from '../../../../design-system/theme-provider';
-import { container } from '../../../../../core/container';
-import { createAppConfig } from '../../../../../core/config';
 import { createAppRouter } from '../../../../routing/router';
-
-beforeAll(() => {
-    if (!window.matchMedia) {
-        window.matchMedia = () =>
-            ({
-                matches: false,
-                addEventListener() {},
-                removeEventListener() {},
-            }) as unknown as MediaQueryList;
-    }
-    container.initialize(createAppConfig());
-});
 
 describe('Bootstrap screen', () => {
     it('renders the section headings', async () => {

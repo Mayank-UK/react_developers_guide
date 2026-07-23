@@ -190,7 +190,7 @@ function BoxModelDemo() {
             <button
                 type="button"
                 onClick={() => setShow((v) => !v)}
-                className="self-start rounded-md border border-outline px-md py-xs text-[var(--text-body-sm)] text-on-surface hover:bg-surface-variant"
+                className="self-start rounded-md border border-outline px-md py-xs text-body-sm text-on-surface hover:bg-surface-variant"
             >
                 {show ? 'Hide' : 'Show'} padding & margin
             </button>
@@ -224,7 +224,7 @@ function BoxModelDemo() {
                     </div>
                 </div>
             </div>
-            <p className="text-[var(--text-caption)] text-on-surface-variant">
+            <p className="text-caption text-on-surface-variant">
                 orange = margin (outside) · teal = padding (inside) · white =
                 content
             </p>
@@ -286,7 +286,7 @@ function FlexDemo() {
                 <button
                     type="button"
                     onClick={() => setCol(false)}
-                    className="rounded-md border border-outline px-sm py-xs text-[var(--text-body-sm)] text-on-surface hover:bg-surface-variant"
+                    className="rounded-md border border-outline px-sm py-xs text-body-sm text-on-surface hover:bg-surface-variant"
                     data-testid="flex-row-btn"
                 >
                     flex-row
@@ -294,7 +294,7 @@ function FlexDemo() {
                 <button
                     type="button"
                     onClick={() => setCol(true)}
-                    className="rounded-md border border-outline px-sm py-xs text-[var(--text-body-sm)] text-on-surface hover:bg-surface-variant"
+                    className="rounded-md border border-outline px-sm py-xs text-body-sm text-on-surface hover:bg-surface-variant"
                     data-testid="flex-col-btn"
                 >
                     flex-col
@@ -367,7 +367,7 @@ function GridDemo() {
                         key={c}
                         type="button"
                         onClick={() => setCol(c)}
-                        className="rounded-md border border-outline px-sm py-xs text-[var(--text-body-sm)] text-on-surface hover:bg-surface-variant"
+                        className="rounded-md border border-outline px-sm py-xs text-body-sm text-on-surface hover:bg-surface-variant"
                         data-selected={col === c}
                         style={
                             col === c
@@ -387,7 +387,7 @@ function GridDemo() {
                 {Array.from({ length: 6 }, (_, i) => (
                     <span
                         key={i}
-                        className="rounded-md px-md py-sm text-center text-[var(--text-body-sm)] text-on-surface-variant"
+                        className="rounded-md px-md py-sm text-center text-body-sm text-on-surface-variant"
                         style={{ backgroundColor: 'var(--color-surface)' }}
                     >
                         {i + 1}

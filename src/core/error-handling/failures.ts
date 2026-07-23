@@ -78,12 +78,22 @@ export class ServerFailure extends Failure {
   }
 }
 
-/** Local cache / database could not satisfy the request. Treat as non-fatal. */
+/**
+ * Local cache / database could not satisfy the request. Defaults to Warning
+ * (non-blocking — e.g. we served stale data despite a cache hiccup), but is
+ * raised to Critical when the cache was the last resort and it failed too
+ * (nothing left to show the user). See `chainedCacheFailure`.
+ */
 export class CacheFailure extends Failure {
   readonly kind = 'cache' as const;
-  readonly severity = FailureSeverity.Warning;
-  constructor(message = 'No cached data available', cause?: Failure) {
+  readonly severity: FailureSeverity;
+  constructor(
+    message = 'No cached data available',
+    cause?: Failure,
+    severity: FailureSeverity = FailureSeverity.Warning,
+  ) {
     super(message, cause);
+    this.severity = severity;
   }
 }
 

@@ -1,19 +1,13 @@
-import { useCallback, useRef, useState } from 'react';
-import type { Failure, FailureKind } from '../../core/error-handling/failures';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Failure } from '../../core/error-handling/failures';
+import { FAILURE_KIND_ICONS as FAILURE_ICONS } from '../failure-icons';
 
 export interface SnackbarEntry {
   id: number;
   failure: Failure;
 }
 
-export const FAILURE_ICONS: Record<FailureKind, string> = {
-  network: '📶',
-  server: '☁︎',
-  cache: '🗄',
-  auth: '🔒',
-  database: '🗄',
-  unknown: '⚠︎',
-};
+export { FAILURE_ICONS };
 
 /**
  * useFailureSnackbar — non-blocking transient notifications for *info/warning*
@@ -26,6 +20,13 @@ export const FAILURE_ICONS: Record<FailureKind, string> = {
 export function useFailureSnackbar() {
   const [entries, setEntries] = useState<SnackbarEntry[]>([]);
   const nextId = useRef(0);
+  const timers = useRef<Set<number>>(new Set());
+
+  // Clear any pending auto-dismiss timers on unmount.
+  useEffect(() => {
+    const set = timers.current;
+    return () => set.forEach((id) => window.clearTimeout(id));
+  }, []);
 
   const dismiss = useCallback((id: number) => {
     setEntries((prev) => prev.filter((e) => e.id !== id));
@@ -35,7 +36,11 @@ export function useFailureSnackbar() {
     (failure: Failure) => {
       const id = nextId.current++;
       setEntries((prev) => [...prev, { id, failure }]);
-      window.setTimeout(() => dismiss(id), 4000);
+      const timer = window.setTimeout(() => {
+        timers.current.delete(timer);
+        dismiss(id);
+      }, 4000);
+      timers.current.add(timer);
     },
     [dismiss],
   );

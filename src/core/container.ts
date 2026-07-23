@@ -60,7 +60,7 @@ class Container {
             'HttpClient',
             createHttpClient({
                 config,
-                logger: this.resolve('Logger'),
+                logger: this.logger,
                 getScenario: () => this.scenario.api,
             }),
         );
@@ -76,25 +76,25 @@ class Container {
     // ---- service accessors ----
 
     get appConfig(): AppConfig {
-        return this.resolve('AppConfig');
+        return this.resolve('AppConfig') as AppConfig;
     }
     get logger(): Logger {
-        return this.resolve('Logger');
+        return this.resolve('Logger') as Logger;
     }
     get httpClient(): AxiosInstance {
-        return this.resolve('HttpClient');
+        return this.resolve('HttpClient') as AxiosInstance;
     }
     get postRemoteDataSource(): PostRemoteDataSource {
-        return this.resolve('PostRemoteDataSource');
+        return this.resolve('PostRemoteDataSource') as PostRemoteDataSource;
     }
     get appDatabase(): AppDatabase {
-        return this.resolve('AppDatabase');
+        return this.resolve('AppDatabase') as AppDatabase;
     }
     get postRepository(): PostRepository {
-        return this.resolve('PostRepository');
+        return this.resolve('PostRepository') as PostRepository;
     }
     get getPostsUseCase(): GetPostsUseCase {
-        return this.resolve('GetPostsUseCase');
+        return this.resolve('GetPostsUseCase') as GetPostsUseCase;
     }
 
     // ---- runtime scenario control (dev) ----
@@ -115,10 +115,10 @@ class Container {
     }
 
     /** Test-only: tear down registered singletons (e.g. close Dexie). */
-    async dispose(): Promise<void> {
+    dispose(): void {
         const db = this.registry.get(key('AppDatabase'));
         if (db instanceof AppDatabaseImpl) {
-            await db.close();
+            db.close();
         }
         this.registry.clear();
     }
@@ -153,16 +153,16 @@ class Container {
         return new GetPostsUseCase(this.postRepository);
     }
 
-    private register<T>(name: string, instance: T): void {
+    private register(name: string, instance: unknown): void {
         this.registry.set(key(name), instance);
     }
 
-    private resolve<T>(name: string): T {
+    private resolve(name: string): unknown {
         const instance = this.registry.get(key(name));
         if (instance === undefined) {
             throw new Error(`Dependency "${name}" is not registered`);
         }
-        return instance as T;
+        return instance;
     }
 }
 

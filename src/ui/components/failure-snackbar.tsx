@@ -1,6 +1,5 @@
 import type { SnackbarEntry } from '../hooks/use-failure-snackbar';
 import { FAILURE_ICONS } from '../hooks/use-failure-snackbar';
-import type { FailureKind } from '../../core/error-handling/failures';
 
 interface FailureSnackbarStackProps {
   entries: SnackbarEntry[];
@@ -27,11 +26,11 @@ export function FailureSnackbarStack({
           key={entry.id}
           type="button"
           onClick={() => onDismiss(entry.id)}
-          className="pointer-events-auto flex w-full max-w-[var(--content-max-width)] items-center gap-md rounded-md px-md py-sm text-left shadow-modal"
+          className="pointer-events-auto flex w-full max-w-content items-center gap-md rounded-md px-md py-sm text-left shadow-modal"
           style={{ backgroundColor: 'var(--color-on-surface)', color: 'var(--color-surface)' }}
         >
-          <span aria-hidden>{FAILURE_ICONS[entry.failure.kind as FailureKind]}</span>
-          <span className="flex-1 text-[var(--text-body-sm)]">
+          <span aria-hidden>{FAILURE_ICONS[entry.failure.kind]}</span>
+          <span className="flex-1 text-body-sm">
             {entry.failure.message}
           </span>
         </button>

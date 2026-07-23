@@ -94,7 +94,7 @@ column spans; the gaps mirror Bootstrap's row gutter.`}
                                 key={row.label}
                                 className="flex flex-col gap-xxs"
                             >
-                                <span className="text-[var(--text-caption)] text-on-surface-variant">
+                                <span className="text-caption text-on-surface-variant">
                                     {row.label}
                                 </span>
                                 <div className="grid grid-cols-12 gap-xs">
@@ -104,7 +104,7 @@ column spans; the gaps mirror Bootstrap's row gutter.`}
                                     ).map((i) => (
                                         <div
                                             key={i}
-                                            className="h-[28px] rounded-sm text-center text-[var(--text-overline)] leading-[28px] text-on-primary"
+                                            className="h-[28px] rounded-sm text-center text-overline leading-[28px] text-on-primary"
                                             style={{
                                                 backgroundColor:
                                                     'var(--color-primary)',

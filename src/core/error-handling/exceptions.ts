@@ -12,7 +12,7 @@
  * reset it to undefined after `super()` runs.
  */
 
-export type AppExceptionCause = AppException | unknown;
+export type AppExceptionCause = unknown;
 
 export interface AppExceptionOptions {
   cause?: AppExceptionCause;

@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import {
     createBrowserRouter,
     createMemoryRouter,
@@ -6,16 +7,40 @@ import {
 } from 'react-router';
 import { RoutePaths } from './routes';
 import { RootLayout } from '../components/root-layout';
-import HomeView from '../views/home/home_view';
-import ReactFundamentalsView from '../views/react_fundamentals/react_fundamentals_view';
-import TsJsFundamentalsView from '../views/ts_js_fundamentals/ts_js_fundamentals_view';
-import LayoutStructureView from '../views/ui_hub/sub_views/layout_structure/layout_structure_view';
-import CssView from '../views/ui_hub/sub_views/css/css_view';
-import BootstrapView from '../views/ui_hub/sub_views/bootstrap/bootstrap_view';
-import TailwindView from '../views/ui_hub/sub_views/tailwind/tailwind_view';
-import InteractiveView from '../views/ui_hub/sub_views/interactive/interactive_view';
-import UiHubView from '../views/ui_hub/ui_hub_view';
-import { PlaceholderView } from '../views/placeholder/placeholder_view';
+
+/**
+ * Each screen is lazy-loaded so the initial bundle ships only the shell + the
+ * landing view; the rest are fetched on demand as separate chunks. The shared
+ * <Suspense> boundary lives in <RootLayout/> around the <Outlet/>.
+ */
+const HomeView = lazy(() => import('../views/home/home_view'));
+const AboutView = lazy(() => import('../views/about/about_view'));
+const ReactFundamentalsView = lazy(() => import('../views/react_fundamentals/react_fundamentals_view'));
+const TsJsFundamentalsView = lazy(() => import('../views/ts_js_fundamentals/ts_js_fundamentals_view'));
+const LayoutStructureView = lazy(() => import('../views/ui_hub/sub_views/layout_structure/layout_structure_view'));
+const CssView = lazy(() => import('../views/ui_hub/sub_views/css/css_view'));
+const BootstrapView = lazy(() => import('../views/ui_hub/sub_views/bootstrap/bootstrap_view'));
+const TailwindView = lazy(() => import('../views/ui_hub/sub_views/tailwind/tailwind_view'));
+const InteractiveView = lazy(() => import('../views/ui_hub/sub_views/interactive/interactive_view'));
+const ResponsiveView = lazy(() => import('../views/ui_hub/sub_views/responsive/responsive_view'));
+const DesignSystemView = lazy(() => import('../views/ui_hub/sub_views/design_system/design_system_view'));
+const LifecycleView = lazy(() => import('../views/lifecycle/lifecycle_view'));
+const NavigationView = lazy(() => import('../views/navigation/navigation_view'));
+const StateManagementView = lazy(() => import('../views/state_management/state_management_view'));
+const HooksView = lazy(() => import('../views/state_management/hooks/hooks_view'));
+const ReduxView = lazy(() => import('../views/state_management/redux/redux_view'));
+const ZustandView = lazy(() => import('../views/state_management/zustand/zustand_view'));
+const TanstackQueryView = lazy(() => import('../views/state_management/tanstack_query/tanstack_query_view'));
+const ApiHandlingView = lazy(() => import('../views/api_handling/api_handling_view'));
+const DatabaseHandlingView = lazy(() => import('../views/database_handling/database_handling_view'));
+const ExceptionHandlingView = lazy(() => import('../views/exception_handling/exception_handling_view'));
+const DependencyManagementView = lazy(() => import('../views/dependency_management/dependency_management_view'));
+const ArchitectureView = lazy(() => import('../views/architecture/architecture_view'));
+const TestingView = lazy(() => import('../views/testing/testing_view'));
+const DebuggingView = lazy(() => import('../views/debugging/debugging_view'));
+const EnvironmentsView = lazy(() => import('../views/environments/environments_view'));
+const BestPracticesView = lazy(() => import('../views/best_practices/best_practices_view'));
+const UiHubView = lazy(() => import('../views/ui_hub/ui_hub_view'));
 
 /**
  * Route table as data — mirrors the Flutter `router.dart` GoRouter config.
@@ -34,6 +59,11 @@ const layoutChildren: RouteObject[] = [
         path: RoutePaths.home,
         element: <HomeView />,
         handle: { title: "React developer's guide" },
+    },
+    {
+        path: RoutePaths.about,
+        element: <AboutView />,
+        handle: { title: 'About' },
     },
 
     // Fundamentals & UI (M2)
@@ -71,96 +101,96 @@ const layoutChildren: RouteObject[] = [
     },
     {
         path: RoutePaths.responsive,
-        element: <PlaceholderView phase="M2" />,
+        element: <ResponsiveView />,
         handle: { title: 'Responsive layout' },
     },
     {
         path: RoutePaths.designSystem,
-        element: <PlaceholderView phase="M2" />,
+        element: <DesignSystemView />,
         handle: { title: 'Design system' },
     },
     {
         path: RoutePaths.lifecycle,
-        element: <PlaceholderView phase="M2" />,
+        element: <LifecycleView />,
         handle: { title: 'Lifecycle' },
     },
     {
         path: RoutePaths.navigation,
-        element: <PlaceholderView phase="M2" />,
+        element: <NavigationView />,
         handle: { title: 'Navigation and routing' },
     },
 
     // Data & state (M3)
     {
         path: RoutePaths.stateManagement,
-        element: <PlaceholderView phase="M3" />,
+        element: <StateManagementView />,
         handle: { title: 'State management' },
     },
     {
         path: RoutePaths.hooks,
-        element: <PlaceholderView phase="M3" />,
+        element: <HooksView />,
         handle: { title: 'State management — Hooks' },
     },
     {
         path: RoutePaths.redux,
-        element: <PlaceholderView phase="M3" />,
+        element: <ReduxView />,
         handle: { title: 'State management — Redux' },
     },
     {
         path: RoutePaths.zustand,
-        element: <PlaceholderView phase="M3" />,
+        element: <ZustandView />,
         handle: { title: 'State management — Zustand' },
     },
     {
         path: RoutePaths.tanstackQuery,
-        element: <PlaceholderView phase="M3" />,
+        element: <TanstackQueryView />,
         handle: { title: 'State management — TanStack Query' },
     },
     {
         path: RoutePaths.apiHandling,
-        element: <PlaceholderView phase="M3" />,
+        element: <ApiHandlingView />,
         handle: { title: 'API handling' },
     },
     {
         path: RoutePaths.databaseHandling,
-        element: <PlaceholderView phase="M3" />,
+        element: <DatabaseHandlingView />,
         handle: { title: 'Database handling' },
     },
     {
         path: RoutePaths.exceptionHandling,
-        element: <PlaceholderView phase="M3" />,
+        element: <ExceptionHandlingView />,
         handle: { title: 'Exception handling' },
     },
 
     // Engineering (M4)
     {
         path: RoutePaths.dependencyManagement,
-        element: <PlaceholderView phase="M4" />,
+        element: <DependencyManagementView />,
         handle: { title: 'Dependency management' },
     },
     {
         path: RoutePaths.architecture,
-        element: <PlaceholderView phase="M4" />,
+        element: <ArchitectureView />,
         handle: { title: 'Architecture' },
     },
     {
         path: RoutePaths.testing,
-        element: <PlaceholderView phase="M4" />,
+        element: <TestingView />,
         handle: { title: 'Testing' },
     },
     {
         path: RoutePaths.debugging,
-        element: <PlaceholderView phase="M4" />,
+        element: <DebuggingView />,
         handle: { title: 'Debugging' },
     },
     {
         path: RoutePaths.environments,
-        element: <PlaceholderView phase="M4" />,
+        element: <EnvironmentsView />,
         handle: { title: 'Environments / Flavours' },
     },
     {
         path: RoutePaths.bestPractices,
-        element: <PlaceholderView phase="M4" />,
+        element: <BestPracticesView />,
         handle: { title: 'Best practices' },
     },
 ];

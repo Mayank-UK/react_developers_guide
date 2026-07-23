@@ -16,7 +16,7 @@ interface SectionWrapperProps {
 export function SectionWrapper({ title, children }: SectionWrapperProps) {
   return (
     <section className="mb-lg w-full rounded-lg border border-outline bg-surface p-lg shadow-button-card">
-      <h2 className="mb-lg flex items-center gap-sm text-[var(--text-title-lg)] font-semibold text-on-surface">
+      <h2 className="mb-lg flex items-center gap-sm text-title-lg font-semibold text-on-surface">
         <span
           aria-hidden
           className="inline-block h-[24px] w-[4px] rounded-pill"

@@ -12,7 +12,7 @@ interface TextBlockProps {
  */
 export function TextBlock({ children }: TextBlockProps) {
   return (
-    <p className="w-full text-[var(--text-body)] leading-[1.7] text-on-surface-variant [white-space:pre-line]">
+    <p className="w-full text-body leading-[1.7] text-on-surface-variant [white-space:pre-line]">
       {children}
     </p>
   );

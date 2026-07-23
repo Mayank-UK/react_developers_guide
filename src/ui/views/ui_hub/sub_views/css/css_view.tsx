@@ -152,7 +152,7 @@ function SpecificityDemo() {
                 <button
                     type="button"
                     onClick={() => setUseInline(false)}
-                    className="rounded-md border border-outline px-sm py-xs text-[var(--text-body-sm)] text-on-surface hover:bg-surface-variant"
+                    className="rounded-md border border-outline px-sm py-xs text-body-sm text-on-surface hover:bg-surface-variant"
                     data-selected={!useInline}
                     style={
                         !useInline
@@ -165,7 +165,7 @@ function SpecificityDemo() {
                 <button
                     type="button"
                     onClick={() => setUseInline(true)}
-                    className="rounded-md border border-outline px-sm py-xs text-[var(--text-body-sm)] text-on-surface hover:bg-surface-variant"
+                    className="rounded-md border border-outline px-sm py-xs text-body-sm text-on-surface hover:bg-surface-variant"
                     data-selected={useInline}
                     style={
                         useInline
@@ -190,7 +190,7 @@ function SpecificityDemo() {
                     ? 'inline style wins (secondary)'
                     : 'class applied (primary)'}
             </div>
-            <p className="text-[var(--text-caption)] text-on-surface-variant">
+            <p className="text-caption text-on-surface-variant">
                 The element always carries the primary class; toggling adds an
                 inline background-color that overrides it.
             </p>
@@ -243,7 +243,7 @@ function UnitsDemo() {
     return (
         <div className="flex flex-col gap-sm" style={{ fontSize: `${root}px` }}>
             <div className="flex flex-wrap items-center gap-sm">
-                <label className="text-[var(--text-body-sm)] text-on-surface-variant">
+                <label className="text-body-sm text-on-surface-variant">
                     root font-size
                 </label>
                 <input
@@ -255,7 +255,7 @@ function UnitsDemo() {
                     className="w-[160px]"
                     aria-label="Root font size in pixels"
                 />
-                <span className="text-[var(--text-body-sm)] text-on-surface tabular-nums">
+                <span className="text-body-sm text-on-surface tabular-nums">
                     {root}px
                 </span>
             </div>
@@ -351,7 +351,8 @@ const DEMO_HUES = [
 
 function CustomPropertiesDemo() {
     const [hue, setHue] = useState(0);
-    const current = DEMO_HUES[hue];
+    const current = DEMO_HUES[hue] ?? DEMO_HUES[0];
+    if (!current) return null;
     return (
         <div className="flex flex-col gap-sm">
             <div className="flex flex-wrap gap-xs">
@@ -360,7 +361,7 @@ function CustomPropertiesDemo() {
                         key={h.label}
                         type="button"
                         onClick={() => setHue(i)}
-                        className="rounded-md border border-outline px-sm py-xs text-[var(--text-body-sm)] capitalize text-on-surface hover:bg-surface-variant"
+                        className="rounded-md border border-outline px-sm py-xs text-body-sm capitalize text-on-surface hover:bg-surface-variant"
                         data-selected={i === hue}
                         style={i === hue ? { borderColor: h.val } : undefined}
                     >
@@ -383,7 +384,7 @@ function CustomPropertiesDemo() {
                     </div>
                 ))}
             </div>
-            <p className="font-[var(--font-mono)] text-[var(--text-caption)] text-on-surface-variant">
+            <p className="font-mono text-caption text-on-surface-variant">
                 --demo-color = {current.val} ({current.label})
             </p>
         </div>

@@ -242,7 +242,7 @@ function TypesPlaygroundDemo() {
             >
                 n = {n}
             </button>
-            <span className="text-[var(--text-body-sm)] text-on-surface-variant">
+            <span className="text-body-sm text-on-surface-variant">
                 doubled ={' '}
                 <span className="text-on-surface" data-testid="doubled-value">
                     {doubled}

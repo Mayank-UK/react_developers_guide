@@ -1,0 +1,34 @@
+import type { Link as LinkModel } from '../../../domain/models/link';
+import { RoutePaths } from '../../routing/routes';
+
+// Module-scoped constant — never recreated per render (same rule as the home hub).
+const NAV_ITEMS: readonly LinkModel[] = [
+    {
+        title: 'Hooks',
+        route: RoutePaths.hooks,
+        description:
+            'useState / useReducer / Context — built-in state, no library.',
+    },
+    {
+        title: 'Redux',
+        route: RoutePaths.redux,
+        description:
+            'Redux Toolkit — a single global store for large, predictable apps.',
+    },
+    {
+        title: 'Zustand',
+        route: RoutePaths.zustand,
+        description:
+            'A tiny hook-based store — the sweet spot for most apps that need global state.',
+    },
+    {
+        title: 'TanStack Query',
+        route: RoutePaths.tanstackQuery,
+        description:
+            'Server state — caching, loading/error, invalidation. Not a UI-state replacement.',
+    },
+];
+
+export function useStateManagementViewModel() {
+    return { NAV_ITEMS };
+}

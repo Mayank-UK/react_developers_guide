@@ -31,6 +31,22 @@
     --font-body: var(--font-body);
     --font-mono: var(--font-mono);
 
+    /* --- type scale (drives text-* size utilities: text-body, text-caption, ...) ---
+     * Every --text-* entry here generates a matching text-* utility, so font-size
+     * tokens are first-class — write `text-caption`, never `text-[var(--text-caption)]`.
+     * (Default Tailwind text sizes — xs/sm/base/lg — remain available alongside.) */
+    --text-display-lg: var(--text-display-lg);
+    --text-display-md: var(--text-display-md);
+    --text-display-sm: var(--text-display-sm);
+    --text-headline: var(--text-headline);
+    --text-title-lg: var(--text-title-lg);
+    --text-title: var(--text-title);
+    --text-title-sm: var(--text-title-sm);
+    --text-body: var(--text-body);
+    --text-body-sm: var(--text-body-sm);
+    --text-caption: var(--text-caption);
+    --text-overline: var(--text-overline);
+
     --radius-sm: var(--radius-sm);
     --radius-md: var(--radius-md);
     --radius-lg: var(--radius-lg);
@@ -49,6 +65,19 @@
     --spacing-lg: var(--space-lg);
     --spacing-xl: var(--space-xl);
     --spacing-xxl: var(--space-xxl);
+
+    /* --- layout (max-w-content reads --content-max-width) --- */
+    --container-content: var(--content-max-width);
+}
+
+/*
+ * Named layout utility for the fixed header height. Height has no first-class
+ * custom-token namespace in Tailwind v4 (it draws from the spacing scale), so a
+ * one-line @utility keeps the token first-class — write `h-header`, not
+ * `h-[var(--header-height)]`.
+ */
+@utility h-header {
+    height: var(--header-height);
 }
 
 :root {

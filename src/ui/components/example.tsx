@@ -17,7 +17,7 @@ interface ExampleProps {
 export function Example({ label = 'Live example', children }: ExampleProps) {
   return (
     <div className="flex flex-col gap-sm rounded-md border border-dashed border-outline bg-surface-variant p-md">
-      <p className="text-[var(--text-overline)] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">
+      <p className="text-overline font-semibold uppercase tracking-[0.08em] text-on-surface-variant">
         ↳ {label}
       </p>
       {children}

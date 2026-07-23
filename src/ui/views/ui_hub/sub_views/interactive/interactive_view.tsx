@@ -51,7 +51,7 @@ this color".`}
                 />
             </ContentGroupWrapper>
             <Example label="The five states, side by side">
-                <p className="text-[var(--text-body-sm)] text-on-surface-variant">
+                <p className="text-body-sm text-on-surface-variant">
                     The first four are live — hover, click-hold, and Tab to
                     focus each one. The fifth is forced into its disabled style.
                 </p>
@@ -59,15 +59,15 @@ this color".`}
                     <StateTile label="default" />
                     <StateTile
                         label=":hover"
-                        className="hover:bg-[var(--color-primary-container)] hover:text-on-primary"
+                        className="hover:bg-primary-container hover:text-on-primary"
                     />
                     <StateTile
                         label=":active"
-                        className="active:scale-95 active:bg-[var(--color-secondary-container)]"
+                        className="active:scale-95 active:bg-secondary-container"
                     />
                     <StateTile
                         label=":focus-visible"
-                        className="focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)]"
+                        className="focus-visible:ring-2 focus-visible:ring-secondary"
                     />
                     <StateTile label=":disabled" disabled />
                 </div>
@@ -90,12 +90,12 @@ function StateTile({
             <button
                 type="button"
                 disabled={disabled}
-                className={`h-[44px] w-[110px] rounded-md border border-outline bg-surface px-sm text-[var(--text-body-sm)] font-medium text-on-surface transition-all duration-150 hover:shadow-button-card ${className}`}
+                className={`h-[44px] w-[110px] rounded-md border border-outline bg-surface px-sm text-body-sm font-medium text-on-surface transition-all duration-150 hover:shadow-button-card ${className}`}
                 data-testid={`state-${label}`}
             >
                 button
             </button>
-            <span className="font-[var(--font-mono)] text-[var(--text-overline)] text-on-surface-variant">
+            <span className="font-mono text-overline text-on-surface-variant">
                 {label}
             </span>
         </div>
@@ -120,16 +120,16 @@ purely via :hover and a transition. No JavaScript state involved.`}
                         {HOVER_CARDS.map((c) => (
                             <div
                                 key={c.title}
-                                className="group cursor-default rounded-md border border-outline bg-surface p-md transition-all duration-200 hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-button-card-hover"
+                                className="group cursor-default rounded-md border border-outline bg-surface p-md transition-all duration-200 hover:-translate-y-1 hover:border-primary hover:shadow-button-card-hover"
                                 data-testid="hover-card"
                             >
-                                <div className="mb-xs text-[var(--text-title-sm)] font-semibold text-on-surface transition-colors group-hover:text-[var(--color-primary)]">
+                                <div className="mb-xs text-title-sm font-semibold text-on-surface transition-colors group-hover:text-primary">
                                     {c.title}
                                 </div>
-                                <p className="text-[var(--text-caption)] text-on-surface-variant">
+                                <p className="text-caption text-on-surface-variant">
                                     {c.desc}
                                 </p>
-                                <p className="mt-xs h-[0px] overflow-hidden text-[var(--text-overline)] text-[var(--color-secondary)] transition-all duration-200 group-hover:mt-xs group-hover:h-[16px]">
+                                <p className="mt-xs h-[0px] overflow-hidden text-overline text-secondary transition-all duration-200 group-hover:mt-xs group-hover:h-[16px]">
                                     {c.reveal}
                                 </p>
                             </div>
@@ -192,7 +192,7 @@ timing-function is the full signature.`}
                 />
             </ContentGroupWrapper>
             <Example label="Compare transition durations">
-                <p className="text-[var(--text-body-sm)] text-on-surface-variant">
+                <p className="text-body-sm text-on-surface-variant">
                     The same hover lift with three durations. Pick one, then
                     toggle hover — feel how the speed changes the feel of the
                     element.
@@ -224,7 +224,7 @@ function TransitionDemo() {
                                 setDuration(d.ms);
                                 setHovered(false);
                             }}
-                            className="rounded-md border border-outline px-sm py-xs text-[var(--text-body-sm)] text-on-surface hover:bg-surface-variant"
+                            className="rounded-md border border-outline px-sm py-xs text-body-sm text-on-surface hover:bg-surface-variant"
                             data-selected={duration === d.ms}
                             style={
                                 duration === d.ms
@@ -290,7 +290,7 @@ accessibility (last section).`}
                 />
             </ContentGroupWrapper>
             <Example label="Play an entrance animation">
-                <p className="text-[var(--text-body-sm)] text-on-surface-variant">
+                <p className="text-body-sm text-on-surface-variant">
                     Click to replay the fadeInUp animation — the card fades in
                     and lifts into place. Compare it with a perpetual spinner (a
                     looping animation).
@@ -308,7 +308,7 @@ function AnimationDemo() {
             <button
                 type="button"
                 onClick={() => setRunId((n) => n + 1)}
-                className="self-start rounded-md border border-outline px-md py-xs text-[var(--text-body-sm)] text-on-surface hover:bg-surface-variant"
+                className="self-start rounded-md border border-outline px-md py-xs text-body-sm text-on-surface hover:bg-surface-variant"
             >
                 replay animation
             </button>
@@ -316,7 +316,7 @@ function AnimationDemo() {
                 {/* key change forces React to remount → animation replays */}
                 <div
                     key={runId}
-                    className="flex h-[56px] w-[120px] items-center justify-center rounded-md text-[var(--text-body-sm)] font-medium text-on-primary"
+                    className="flex h-[56px] w-[120px] items-center justify-center rounded-md text-body-sm font-medium text-on-primary"
                     style={{
                         backgroundColor: 'var(--color-primary)',
                         animation: 'fadeInUp 0.4s ease both',
@@ -326,11 +326,11 @@ function AnimationDemo() {
                     fadeInUp
                 </div>
                 <div
-                    className="h-[40px] w-[40px] rounded-full border-4 border-[var(--color-secondary)] border-t-transparent"
+                    className="h-[40px] w-[40px] rounded-full border-4 border-secondary border-t-transparent"
                     style={{ animation: 'spin 1s linear infinite' }}
                     aria-hidden
                 />
-                <span className="text-[var(--text-caption)] text-on-surface-variant">
+                <span className="text-caption text-on-surface-variant">
                     spinner (infinite loop)
                 </span>
             </div>

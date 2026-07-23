@@ -1,9 +1,7 @@
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { RouterProvider } from 'react-router';
 import { ThemeProvider } from '../../design-system/theme-provider';
-import { container } from '../../../core/container';
-import { createAppConfig } from '../../../core/config';
 import { createAppRouter } from '../../routing/router';
 
 /**
@@ -12,18 +10,6 @@ import { createAppRouter } from '../../routing/router';
  * guard against regressions in the interactive examples, which type-checking
  * can't catch.
  */
-beforeAll(() => {
-    if (!window.matchMedia) {
-        window.matchMedia = () =>
-            ({
-                matches: false,
-                addEventListener() {},
-                removeEventListener() {},
-            }) as unknown as MediaQueryList;
-    }
-    container.initialize(createAppConfig());
-});
-
 describe('React fundamentals screen', () => {
     it('renders the section headings', async () => {
         const router = createAppRouter(['/react-fundamentals']);
@@ -71,12 +57,12 @@ describe('React fundamentals screen', () => {
 
         const input = screen.getByPlaceholderText(
             'Add a task…',
-        ) as HTMLInputElement;
+        );
         fireEvent.change(input, { target: { value: 'My new task' } });
         fireEvent.keyDown(input, { key: 'Enter' });
 
         expect(screen.getByText('My new task')).toBeInTheDocument();
-        fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]);
+        fireEvent.click(screen.getAllByRole('button', { name: 'remove' })[0]!);
         expect(screen.queryByText('Learn JSX')).not.toBeInTheDocument();
     });
 });

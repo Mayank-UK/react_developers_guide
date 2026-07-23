@@ -19,7 +19,7 @@ export function ContentGroupWrapper({
 }: ContentGroupWrapperProps) {
   return (
     <div className="flex flex-col gap-md">
-      <p className="text-[var(--text-overline)] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">
+      <p className="text-overline font-semibold uppercase tracking-[0.08em] text-on-surface-variant">
         {title}
       </p>
       {children}

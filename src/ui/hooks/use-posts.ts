@@ -55,9 +55,14 @@ export function usePosts(
 
     const fetch = useCallback(() => {
         let cancelled = false;
-        (async () => {
+        void (async () => {
             dispatch({ type: 'fetch' });
             const result = await getPostsUseCase.execute();
+            // `cancelled` is flipped by the cleanup closure below; the type
+            // checker can't see that cross-closure mutation, so it looks always
+            // false here. The guard is genuinely needed to avoid dispatching
+            // after unmount.
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (cancelled) return;
             if (result.ok) {
                 dispatch({

@@ -5,6 +5,7 @@
  */
 export const RoutePaths = {
   home: '/',
+  about: '/about',
   reactFundamentals: '/react-fundamentals',
   tsJsFundamentals: '/typescript-javascript-fundamentals',
   ui: '/ui',

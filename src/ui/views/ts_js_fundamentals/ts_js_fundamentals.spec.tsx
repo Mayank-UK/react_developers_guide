@@ -1,9 +1,7 @@
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { RouterProvider } from 'react-router';
 import { ThemeProvider } from '../../design-system/theme-provider';
-import { container } from '../../../core/container';
-import { createAppConfig } from '../../../core/config';
 import { createAppRouter } from '../../routing/router';
 
 /**
@@ -11,18 +9,6 @@ import { createAppRouter } from '../../routing/router';
  * section headings and drives the small counter demo to guard the interactive
  * example against regressions.
  */
-beforeAll(() => {
-    if (!window.matchMedia) {
-        window.matchMedia = () =>
-            ({
-                matches: false,
-                addEventListener() {},
-                removeEventListener() {},
-            }) as unknown as MediaQueryList;
-    }
-    container.initialize(createAppConfig());
-});
-
 describe('TS/JS fundamentals screen', () => {
     it('renders the section headings', async () => {
         const router = createAppRouter(['/typescript-javascript-fundamentals']);

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 interface CodeBlockProps {
   code: string;
@@ -20,13 +20,22 @@ interface CodeBlockProps {
 export function CodeBlock({ code, language, caption, defaultOpen = false }: CodeBlockProps) {
   const [open, setOpen] = useState(defaultOpen);
   const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<number | undefined>(undefined);
+
+  useEffect(
+    () => () => {
+      if (resetTimer.current !== undefined) window.clearTimeout(resetTimer.current);
+    },
+    [],
+  );
 
   const copy = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
+      if (resetTimer.current !== undefined) window.clearTimeout(resetTimer.current);
+      resetTimer.current = window.setTimeout(() => setCopied(false), 1500);
     } catch {
       /* clipboard may be unavailable; ignore */
     }
@@ -38,7 +47,7 @@ export function CodeBlock({ code, language, caption, defaultOpen = false }: Code
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="flex items-center gap-xs font-[var(--font-mono)] text-[var(--text-caption)] text-on-surface-variant hover:text-on-surface"
+          className="flex items-center gap-xs font-mono text-caption text-on-surface-variant hover:text-on-surface"
           aria-expanded={open}
         >
           <span className="inline-block w-[10px] text-center text-on-surface-variant">
@@ -48,19 +57,19 @@ export function CodeBlock({ code, language, caption, defaultOpen = false }: Code
         </button>
         <button
           type="button"
-          onClick={copy}
-          className="rounded-sm px-xs text-[var(--text-caption)] text-on-surface-variant hover:bg-black/5 hover:text-on-surface"
+          onClick={(e) => void copy(e)}
+          className="rounded-sm px-xs text-caption text-on-surface-variant hover:bg-black/5 hover:text-on-surface"
         >
           {copied ? '✓ copied' : 'copy'}
         </button>
       </div>
       {open && (
         <>
-          <pre className="overflow-x-auto border-t border-outline px-md py-md font-[var(--font-mono)] text-[var(--text-body-sm)] leading-relaxed text-on-surface">
+          <pre className="overflow-x-auto border-t border-outline px-md py-md font-mono text-body-sm leading-relaxed text-on-surface">
             <code>{code}</code>
           </pre>
           {caption && (
-            <div className="border-t border-outline bg-surface-variant px-md py-xs text-[var(--text-caption)] text-on-surface-variant">
+            <div className="border-t border-outline bg-surface-variant px-md py-xs text-caption text-on-surface-variant">
               {caption}
             </div>
           )}

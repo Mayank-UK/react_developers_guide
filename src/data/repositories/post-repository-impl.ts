@@ -2,7 +2,7 @@ import { Logger } from '../../core/config/logger';
 import { success } from '../../core/result';
 import {
   AppDatabaseException,
-  NetworkException,
+  AppException,
 } from '../../core/error-handling/exceptions';
 import {
   chainedCacheFailure,
@@ -59,34 +59,34 @@ export class PostRepositoryImpl implements PostRepository {
       },
       onNetworkError: (cause) => this.serveFromCache(cause),
       onServerError: (cause) =>
-        this.serveFromCache(cause as unknown as NetworkException),
+        this.serveFromCache(cause),
     });
   }
 
   /** Cache fallback shared by network + server error paths. */
-  private async serveFromCache(cause: NetworkException) {
+  private async serveFromCache(cause: AppException) {
     this.logger.warning(
       `Remote fetch failed (${cause.constructor.name}), falling back to cache`,
     );
 
-    const networkFailure = mapExceptionToFailure(cause);
+    const upstreamFailure = mapExceptionToFailure(cause);
 
     try {
       const cached = await this.local.getPosts();
       if (cached.length > 0) {
         // Non-blocking: show stale data, warn the user.
-        return success(cached.map(toPost), networkFailure);
+        return success(cached.map(toPost), upstreamFailure);
       }
-      // No cache → surface the original network failure (blocking).
+      // No cache → surface the original upstream failure (blocking).
       return forwardNetworkFailure(cause);
     } catch (e) {
       const dbError =
         e instanceof AppDatabaseException
           ? e
           : new AppDatabaseException('Cache read failed', { cause: e });
-      const chained = new CacheFailure(dbError.message, networkFailure);
+      const chained = new CacheFailure(dbError.message, upstreamFailure);
       this.logger.error(`Cache fallback also failed:\n${chained.chain}`);
-      return chainedCacheFailure(dbError, networkFailure);
+      return chainedCacheFailure(dbError, upstreamFailure);
     }
   }
 }

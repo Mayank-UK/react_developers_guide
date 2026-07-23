@@ -18,7 +18,6 @@ import {
  * screen can flip it at runtime) and rejects with a typed AppException.
  */
 export class FailureInjectionInterceptor {
-  private unsubscribe?: () => void;
   private readonly getScenario: () => ApiScenario;
 
   constructor(getScenario: () => ApiScenario) {
@@ -46,11 +45,7 @@ export class FailureInjectionInterceptor {
       }
     };
 
-    const id = request.use(onFulfilled);
-    this.unsubscribe = () => request.eject(id);
-  }
-
-  dispose(): void {
-    this.unsubscribe?.();
+    // Lives for the lifetime of the app's single axios instance; no eject.
+    request.use(onFulfilled);
   }
 }

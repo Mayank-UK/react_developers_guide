@@ -7,4 +7,4 @@ services:
     container_name: my-react-app-prod
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80:8080"
