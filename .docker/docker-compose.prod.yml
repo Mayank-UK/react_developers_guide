@@ -3,8 +3,8 @@ services:
     build:
       context: ..
       dockerfile: .docker/Dockerfile.prod
-    image: my-react-app-prod
-    container_name: my-react-app-prod
+    image: react_developers_guide-prod
+    container_name: react_developers_guide-prod
     restart: unless-stopped
     ports:
       - "80:8080"
