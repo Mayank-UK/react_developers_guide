@@ -34,6 +34,24 @@ describe('container', () => {
         container.setDbScenario(DbScenario.Success);
     });
 
+    it('rebuilds the remote→repository→usecase graph when toggling fake api', () => {
+        const before = container.getPostsUseCase;
+        expect(container.getUseFakeApi()).toBe(true);
+
+        container.setUseFakeApi(false); // switch to the live jsonplaceholder path
+        expect(container.getUseFakeApi()).toBe(false);
+        expect(container.getPostsUseCase).not.toBe(before); // rebuilt singleton
+
+        // idempotent: a no-op toggle does not rebuild
+        const live = container.getPostsUseCase;
+        container.setUseFakeApi(false);
+        expect(container.getPostsUseCase).toBe(live);
+
+        // restore for other suites
+        container.setUseFakeApi(true);
+        expect(container.getUseFakeApi()).toBe(true);
+    });
+
     it('dispose clears the registry so subsequent resolve throws', () => {
         container.dispose();
         expect(() => container.logger).toThrow(/is not registered/);

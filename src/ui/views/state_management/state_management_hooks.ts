@@ -29,6 +29,6 @@ const NAV_ITEMS: readonly LinkModel[] = [
     },
 ];
 
-export function useStateManagementViewModel() {
+export function useStateManagementNav() {
     return { NAV_ITEMS };
 }

@@ -43,6 +43,6 @@ const NAV_ITEMS: readonly LinkModel[] = [
     },
 ];
 
-export function useUiHubViewModel() {
+export function useUiHubNav() {
     return { NAV_ITEMS };
 }

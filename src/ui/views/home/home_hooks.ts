@@ -21,16 +21,6 @@ const NAV_ITEMS: readonly LinkModel[] = [
             'Layout, styling (CSS / Bootstrap / Tailwind), interactions.',
     },
     {
-        title: 'Responsive layout',
-        route: RoutePaths.responsive,
-        description: 'How responsiveness is done the standard React way.',
-    },
-    {
-        title: 'Design system',
-        route: RoutePaths.designSystem,
-        description: 'The token-driven system powering this whole app.',
-    },
-    {
         title: 'Lifecycle',
         route: RoutePaths.lifecycle,
         description: 'Mount, update, unmount — effects and cleanup.',
@@ -92,6 +82,6 @@ const NAV_ITEMS: readonly LinkModel[] = [
     },
 ];
 
-export function useHomeViewModel() {
+export function useHomeNav() {
     return { NAV_ITEMS };
 }

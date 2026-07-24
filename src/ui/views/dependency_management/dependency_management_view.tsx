@@ -1,10 +1,8 @@
-import { useState } from 'react';
 import { SectionWrapper } from '../../components/section-wrapper';
 import { ContentGroupWrapper } from '../../components/content-group-wrapper';
 import { TextBlock } from '../../components/text-block';
 import { CodeBlock } from '../../components/code-block';
 import { Example } from '../../components/example';
-import { container } from '../../../core/container';
 import { Environment } from '../../../core/config/app-config';
 import {
     API_SCENARIOS,
@@ -14,8 +12,7 @@ import {
     DB_SCENARIOS,
     DbScenario,
 } from '../../../core/scenario/db-scenario';
-import { FakeApiService } from '../../../data/fake/fake-api-service';
-import { FakeAppDatabase } from '../../../data/fake/fake-app-database';
+import { useWiringDemo } from './dependency_management_hooks';
 
 /**
  * DependencyManagementView — how the app's services are created and connected.
@@ -364,15 +361,17 @@ here.`}
 }
 
 function WiringDemo() {
-    const [, setTick] = useState(0);
-    const rerender = () => setTick((t) => t + 1);
-
-    const config = container.appConfig;
-    const apiScenario = container.getApiScenario();
-    const dbScenario = container.getDbScenario();
-
-    const remoteIsFake = container.postRemoteDataSource instanceof FakeApiService;
-    const dbIsFake = container.appDatabase instanceof FakeAppDatabase;
+    const {
+        environment,
+        useFakeApi,
+        useFakeDatabase,
+        apiScenario,
+        dbScenario,
+        remoteIsFake,
+        dbIsFake,
+        setApiScenario,
+        setDbScenario,
+    } = useWiringDemo();
 
     const envLabel: Record<string, string> = {
         [Environment.Dev]: 'dev',
@@ -384,11 +383,11 @@ function WiringDemo() {
         <div className="flex flex-col gap-sm">
             <div className="flex flex-wrap items-center gap-xs">
                 <span className="rounded-pill border border-outline px-sm py-[2px] text-overline uppercase tracking-[0.08em] text-on-surface-variant">
-                    env: {envLabel[config.environment]}
+                    env: {envLabel[environment]}
                 </span>
                 <span className="text-caption text-on-surface-variant">
-                    useFakeApi: {String(config.useFakeApi)} · useFakeDatabase:{' '}
-                    {String(config.useFakeDatabase)}
+                    useFakeApi: {String(useFakeApi)} · useFakeDatabase:{' '}
+                    {String(useFakeDatabase)}
                 </span>
             </div>
 
@@ -425,10 +424,9 @@ function WiringDemo() {
                     API scenario
                     <select
                         value={apiScenario}
-                        onChange={(e) => {
-                            container.setApiScenario(e.target.value as ApiScenario);
-                            rerender();
-                        }}
+                        onChange={(e) =>
+                            setApiScenario(e.target.value as ApiScenario)
+                        }
                         className="rounded-md border border-outline bg-surface px-sm py-xs text-body-sm text-on-surface outline-none focus:border-primary"
                     >
                         {API_SCENARIOS.map((s) => (
@@ -442,10 +440,9 @@ function WiringDemo() {
                     DB scenario
                     <select
                         value={dbScenario}
-                        onChange={(e) => {
-                            container.setDbScenario(e.target.value as DbScenario);
-                            rerender();
-                        }}
+                        onChange={(e) =>
+                            setDbScenario(e.target.value as DbScenario)
+                        }
                         className="rounded-md border border-outline bg-surface px-sm py-xs text-body-sm text-on-surface outline-none focus:border-primary"
                     >
                         {DB_SCENARIOS.map((s) => (
@@ -459,7 +456,8 @@ function WiringDemo() {
             <p className="text-caption text-on-surface-variant">
                 Flipped at runtime via container.setApiScenario / setDbScenario —
                 the next fetch observes the new value. (Fake ↔ real is decided at
-                initialize() from env config, so it needs a restart to change.)
+                initialize() from env config; the API-handling screen can also
+                swap the remote live via container.setUseFakeApi.)
             </p>
         </div>
     );

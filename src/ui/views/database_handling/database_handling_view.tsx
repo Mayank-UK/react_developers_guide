@@ -1,16 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
 import { SectionWrapper } from '../../components/section-wrapper';
 import { ContentGroupWrapper } from '../../components/content-group-wrapper';
 import { TextBlock } from '../../components/text-block';
 import { CodeBlock } from '../../components/code-block';
 import { Example } from '../../components/example';
-import { container } from '../../../core/container';
 import {
     DB_SCENARIOS,
     DbScenario,
 } from '../../../core/scenario/db-scenario';
-import { AppDatabaseException } from '../../../core/error-handling/exceptions';
-import type { PostDTO } from '../../../data/remote/dtos/post-dto';
+import { useCacheDemo } from './database_handling_hooks';
 
 /**
  * DatabaseHandlingView — local persistence in this app.
@@ -286,21 +283,6 @@ const SCENARIO_LABEL: Record<DbScenario, string> = {
     [DbScenario.WriteError]: 'write error',
 };
 
-const SAMPLE_POSTS: PostDTO[] = [
-    { id: 1, title: 'Cached post', body: 'Written to the local store.' },
-    {
-        id: 2,
-        title: 'Offline-first',
-        body: 'Served when the remote is unreachable.',
-    },
-];
-
-type CacheState =
-    | { status: 'idle' }
-    | { status: 'reading' }
-    | { status: 'read'; posts: PostDTO[] }
-    | { status: 'error'; message: string };
-
 function LiveDemoSection() {
     return (
         <SectionWrapper title="Live — read and write the cache directly">
@@ -322,60 +304,8 @@ API-handling screen; here you're touching the store itself.`}
 }
 
 function CacheDemo() {
-    const db = container.appDatabase;
-    const [scenario, setScenario] = useState<DbScenario>(
-        container.getDbScenario(),
-    );
-    const [cache, setCache] = useState<CacheState>({ status: 'idle' });
-    const [note, setNote] = useState<string | null>(null);
-
-    const applyScenario = (next: DbScenario) => {
-        setScenario(next);
-        container.setDbScenario(next);
-    };
-
-    const write = useCallback(async () => {
-        setNote(null);
-        try {
-            await db.insertPosts(SAMPLE_POSTS);
-            setNote(`Wrote ${SAMPLE_POSTS.length} posts to the cache.`);
-        } catch (e) {
-            const msg =
-                e instanceof AppDatabaseException
-                    ? e.message
-                    : e instanceof Error
-                      ? e.message
-                      : String(e);
-            setNote(`AppDatabaseException: ${msg}`);
-        }
-    }, [db]);
-
-    const read = useCallback(async () => {
-        setNote(null);
-        setCache({ status: 'reading' });
-        try {
-            const posts = await db.getPosts();
-            setCache({ status: 'read', posts });
-        } catch (e) {
-            const msg =
-                e instanceof AppDatabaseException
-                    ? e.message
-                    : e instanceof Error
-                      ? e.message
-                      : String(e);
-            setCache({ status: 'error', message: msg });
-        }
-    }, [db]);
-
-    // Show the cached contents as soon as the demo mounts. "Load on mount" is
-    // the canonical effect use; `read` resolves async and setState happens
-    // after the awaited work, not as a synchronous render cascade.
-    useEffect(() => {
-        // "Load on mount" is the canonical effect use; `read` resolves async
-        // and setState happens after the awaited work, not as a render cascade.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        void read();
-    }, [read]);
+    const { scenario, applyScenario, cache, note, write, read } =
+        useCacheDemo();
 
     return (
         <div className="flex flex-col gap-sm">

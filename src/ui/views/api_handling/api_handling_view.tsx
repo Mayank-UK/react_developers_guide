@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
 import { SectionWrapper } from '../../components/section-wrapper';
 import { ContentGroupWrapper } from '../../components/content-group-wrapper';
 import { TextBlock } from '../../components/text-block';
@@ -6,15 +5,17 @@ import { CodeBlock } from '../../components/code-block';
 import { Example } from '../../components/example';
 import { ShowError } from '../../components/show-error';
 import { FailureSnackbarStack } from '../../components/failure-snackbar';
-import { useFailureSnackbar } from '../../hooks/use-failure-snackbar';
-import { usePosts, isBlocking } from '../../hooks/use-posts';
-import { container } from '../../../core/container';
+import { isBlocking } from '../../hooks/use-posts';
 import {
     API_SCENARIOS,
     ApiScenario,
 } from '../../../core/scenario/api-scenario';
-import { DbScenario } from '../../../core/scenario/db-scenario';
-import type { Failure } from '../../../core/error-handling/failures';
+import {
+    DATA_SOURCE_OPTIONS,
+    DATA_SOURCE_LABEL,
+    useApiHandlingDemo,
+    type DataSourceMode,
+} from './api_handling_hooks';
 
 /**
  * ApiHandlingView — how data reaches the UI in this app.
@@ -339,16 +340,22 @@ function LiveDemoSection() {
                 <TextBlock>
                     {`This is not a mock — it is the actual pipeline. The demo calls
 the same usePosts hook the home screen uses, which calls GetPostsUseCase →
-PostRepositoryImpl → the remote data source. In dev the container wires in a
-FakeApiService (with latency) so you can steer the outcome:
+PostRepositoryImpl → the remote data source. Use the controls to steer it:
 
+• data source — "fake" serves canned posts from the dev FakeApiService;
+  "live" fetches the real jsonplaceholder.typicode.com /posts through the same
+  http client (whose failure-injection interceptor still honours the API
+  scenario, so network/server errors work in both modes).
 • success — posts arrive and are written to the cache.
 • network error / server error — the remote fails, so the repository falls back
   to the cache. Because the previous success cached the posts, you still see
   them, plus a non-blocking warning toast. That is the offline-first strategy
   in action.
 • flip "treat cache as empty" too, and a network error becomes a cache miss → a
-  blocking full-screen error (Retry re-runs the pipeline).`}
+  blocking full-screen error (Retry re-runs the pipeline).
+• flip "simulate cache read error" alongside a remote failure, and the cache
+  fallback itself throws → a chained CacheFailure (cause → network failure),
+  the blocking path that shows how errors compound through the layers.`}
                 </TextBlock>
             </ContentGroupWrapper>
             <Example label="Real usePosts → use case → repository → remote/cache">
@@ -359,38 +366,8 @@ FakeApiService (with latency) so you can steer the outcome:
 }
 
 function PostsDemo() {
-    const { state, fetch } = usePosts();
-    const snackbar = useFailureSnackbar();
-    const [scenario, setScenario] = useState<ApiScenario>(
-        container.getApiScenario(),
-    );
-    const [emptyCache, setEmptyCache] = useState(false);
-    const shownWarning = useRef<Failure | null>(null);
-
-    // Surface a non-blocking warning exactly once per distinct warning object.
-    useEffect(() => {
-        if (
-            state.status === 'loaded' &&
-            state.warning &&
-            state.warning !== shownWarning.current
-        ) {
-            shownWarning.current = state.warning;
-            snackbar.show(state.warning);
-        }
-    }, [state, snackbar]);
-
-    const changeScenario = (next: ApiScenario) => {
-        setScenario(next);
-        container.setApiScenario(next);
-        fetch();
-    };
-
-    const toggleEmptyCache = (empty: boolean) => {
-        setEmptyCache(empty);
-        // Empty cache makes a network/server failure a cache miss (blocking).
-        container.setDbScenario(empty ? DbScenario.Empty : DbScenario.Success);
-        fetch();
-    };
+    const demo = useApiHandlingDemo();
+    const { state, refetch } = demo;
 
     return (
         <div className="flex flex-col gap-sm">
@@ -398,9 +375,9 @@ function PostsDemo() {
                 <label className="flex items-center gap-xs text-caption text-on-surface-variant">
                     API scenario
                     <select
-                        value={scenario}
+                        value={demo.scenario}
                         onChange={(e) =>
-                            changeScenario(e.target.value as ApiScenario)
+                            demo.changeScenario(e.target.value as ApiScenario)
                         }
                         className="rounded-md border border-outline bg-surface px-sm py-xs text-body-sm text-on-surface outline-none focus:border-primary"
                     >
@@ -411,18 +388,49 @@ function PostsDemo() {
                         ))}
                     </select>
                 </label>
+                <label className="flex items-center gap-xs text-caption text-on-surface-variant">
+                    data source
+                    <select
+                        value={demo.dataSource}
+                        onChange={(e) =>
+                            demo.changeDataSource(
+                                e.target.value as DataSourceMode,
+                            )
+                        }
+                        className="rounded-md border border-outline bg-surface px-sm py-xs text-body-sm text-on-surface outline-none focus:border-primary"
+                    >
+                        {DATA_SOURCE_OPTIONS.map((s) => (
+                            <option key={s} value={s}>
+                                {DATA_SOURCE_LABEL[s]}
+                            </option>
+                        ))}
+                    </select>
+                </label>
                 <label className="flex cursor-pointer items-center gap-xs text-caption text-on-surface-variant">
                     <input
                         type="checkbox"
-                        checked={emptyCache}
-                        onChange={(e) => toggleEmptyCache(e.target.checked)}
+                        checked={demo.emptyCache}
+                        onChange={(e) =>
+                            demo.toggleEmptyCache(e.target.checked)
+                        }
                         className="accent-[var(--color-primary)]"
                     />
                     treat cache as empty
                 </label>
+                <label className="flex cursor-pointer items-center gap-xs text-caption text-on-surface-variant">
+                    <input
+                        type="checkbox"
+                        checked={demo.cacheReadError}
+                        onChange={(e) =>
+                            demo.toggleCacheReadError(e.target.checked)
+                        }
+                        className="accent-[var(--color-primary)]"
+                    />
+                    simulate cache read error
+                </label>
                 <button
                     type="button"
-                    onClick={() => fetch()}
+                    onClick={() => refetch()}
                     className="rounded-md border border-outline px-sm py-xs text-caption text-on-surface-variant hover:bg-surface-variant"
                 >
                     ↻ refetch
@@ -440,7 +448,7 @@ function PostsDemo() {
 
             {state.status === 'error' && isBlocking(state.failure) && (
                 <div data-testid="posts-error">
-                    <ShowError failure={state.failure} onRetry={() => fetch()} />
+                    <ShowError failure={state.failure} onRetry={() => refetch()} />
                 </div>
             )}
 
@@ -471,8 +479,8 @@ function PostsDemo() {
             </p>
 
             <FailureSnackbarStack
-                entries={snackbar.entries}
-                onDismiss={snackbar.dismiss}
+                entries={demo.snackbar.entries}
+                onDismiss={demo.snackbar.dismiss}
             />
         </div>
     );

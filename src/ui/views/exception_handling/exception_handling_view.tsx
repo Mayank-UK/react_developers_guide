@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from 'react';
 import { SectionWrapper } from '../../components/section-wrapper';
 import { ContentGroupWrapper } from '../../components/content-group-wrapper';
 import { TextBlock } from '../../components/text-block';
@@ -6,8 +5,6 @@ import { CodeBlock } from '../../components/code-block';
 import { Example } from '../../components/example';
 import { ShowError } from '../../components/show-error';
 import { FailureSnackbarStack } from '../../components/failure-snackbar';
-import { useFailureSnackbar } from '../../hooks/use-failure-snackbar';
-import { container } from '../../../core/container';
 import {
     API_SCENARIOS,
     ApiScenario,
@@ -20,7 +17,7 @@ import {
     Failure,
     FailureSeverity,
 } from '../../../core/error-handling/failures';
-import type { PostDTO } from '../../../data/remote/dtos/post-dto';
+import { usePipelineDemo, type Outcome } from './exception_handling_hooks';
 
 /**
  * ExceptionHandlingView — how errors travel from a flaky network to the right
@@ -349,16 +346,6 @@ const DB_LABEL: Record<DbScenario, string> = {
     [DbScenario.WriteError]: 'write error',
 };
 
-type Outcome =
-    | { ok: true; count: number; warning?: Failure }
-    | { ok: false; failure: Failure };
-
-/** Posts written straight to the cache on mount so fallback paths have data. */
-const SEED_POSTS: PostDTO[] = [
-    { id: 1, title: 'Cached post', body: 'Seeded so the fallback can serve it.' },
-    { id: 2, title: 'Second cached post', body: 'Also in the local store.' },
-];
-
 const SEVERITY_STYLE: Record<FailureSeverity, string> = {
     [FailureSeverity.Critical]: 'border-error text-error',
     [FailureSeverity.Warning]: 'border-amber-500 text-amber-600',
@@ -392,44 +379,8 @@ exactly what the guards produced.`}
 }
 
 function PipelineDemo() {
-    const useCase = container.getPostsUseCase;
-    const snackbar = useFailureSnackbar();
-    const [api, setApi] = useState<ApiScenario>(ApiScenario.Success);
-    const [db, setDb] = useState<DbScenario>(DbScenario.Success);
-    const [running, setRunning] = useState(false);
-    const [outcome, setOutcome] = useState<Outcome | null>(null);
-
-    const run = useCallback(
-        async (apiScenario: ApiScenario, dbScenario: DbScenario) => {
-            setRunning(true);
-            container.setApiScenario(apiScenario);
-            container.setDbScenario(dbScenario);
-            const result = await useCase.execute();
-            if (result.ok) {
-                setOutcome({
-                    ok: true,
-                    count: result.value.length,
-                    warning: result.warning,
-                });
-                if (result.warning) snackbar.show(result.warning);
-            } else {
-                setOutcome({ ok: false, failure: result.failure });
-            }
-            setRunning(false);
-        },
-        [useCase, snackbar],
-    );
-
-    // Seed the cache once on mount (a cheap direct DB write, not a full remote
-    // round-trip) so the fallback paths have data to serve straight away.
-    useEffect(() => {
-        container.setApiScenario(ApiScenario.Success);
-        container.setDbScenario(DbScenario.Success);
-        void container.appDatabase.insertPosts(SEED_POSTS).then(
-            () => setOutcome({ ok: true, count: SEED_POSTS.length }),
-            () => setOutcome({ ok: true, count: 0 }),
-        );
-    }, []);
+    const { api, setApi, db, setDb, running, outcome, run, snackbar } =
+        usePipelineDemo();
 
     return (
         <div className="flex flex-col gap-sm">

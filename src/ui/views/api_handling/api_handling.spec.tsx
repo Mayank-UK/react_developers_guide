@@ -1,13 +1,21 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { RouterProvider } from 'react-router';
 import { ThemeProvider } from '../../design-system/theme-provider';
 import { container } from '../../../core/container';
 import { createAppRouter } from '../../routing/router';
 import { ApiScenario } from '../../../core/scenario/api-scenario';
+import { DbScenario } from '../../../core/scenario/db-scenario';
 
 // The fake API resolves after ~600ms; allow a comfortable margin.
 const WAIT = { timeout: 5000 };
+
+// Reset the shared dev scenario holders between tests so a previous run's
+// cache-read-error / empty / failure scenario doesn't bleed into the next.
+beforeEach(() => {
+    container.setApiScenario(ApiScenario.Success);
+    container.setDbScenario(DbScenario.Success);
+});
 
 describe('API handling screen', () => {
     it('renders the section headings', async () => {

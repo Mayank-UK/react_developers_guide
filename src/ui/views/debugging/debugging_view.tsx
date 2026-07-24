@@ -1,10 +1,14 @@
-import { Component, useState, type ErrorInfo, type ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { SectionWrapper } from '../../components/section-wrapper';
 import { ContentGroupWrapper } from '../../components/content-group-wrapper';
 import { TextBlock } from '../../components/text-block';
 import { CodeBlock } from '../../components/code-block';
 import { Example } from '../../components/example';
-import { Logger } from '../../../core/config/logger';
+import {
+    LEVELS,
+    useCrashDemo,
+    useLoggerDemo,
+} from './debugging_hooks';
 
 /**
  * DebuggingView — how to find out what is wrong when a React app misbehaves.
@@ -279,36 +283,8 @@ per environment.`}
     );
 }
 
-const LEVELS = ['debug', 'info', 'warning', 'error'] as const;
-type Level = (typeof LEVELS)[number];
-
 function LoggerDemo() {
-    const [prodMode, setProdMode] = useState(false);
-    const [log, setLog] = useState<string[]>([]);
-
-    const emit = (level: Level) => {
-        const logger = new Logger('Playground', !prodMode);
-        const before = console.log;
-        const captured: string[] = [];
-        // Demo-only: temporarily monkeypatch console.log to capture what the
-        // Logger actually emits. Mutating a host global is intentionally
-        // pedagogical — restored in the `finally` below.
-        // eslint-disable-next-line react-hooks/immutability
-        console.log = (...args: unknown[]) => {
-            captured.push(args.map(String).join(' '));
-        };
-        try {
-            logger[level](`emitted at ${level} level`);
-        } finally {
-            console.log = before;
-        }
-        // If the gate dropped it (captured empty), say so explicitly.
-        const line =
-            captured.length > 0
-                ? (captured[0] ?? '')
-                : `(dropped — below ${prodMode ? 'error' : 'debug'} gate)`;
-        setLog((l) => [line, ...l].slice(0, 8));
-    };
+    const { prodMode, setProdMode, log, emit } = useLoggerDemo();
 
     return (
         <div className="flex flex-col gap-md">
@@ -415,7 +391,7 @@ function Crashable({ shouldCrash }: { shouldCrash: boolean }) {
 }
 
 function LiveBoundarySection() {
-    const [crash, setCrash] = useState(false);
+    const { crash, toggle } = useCrashDemo();
     return (
         <SectionWrapper title="Live — trigger a render crash, watch the boundary catch it">
             <ContentGroupWrapper title="The boundary isolates the crash instead of white-screening">
@@ -433,7 +409,7 @@ message it shows is the real Error.message that was thrown.`}
                             <Crashable shouldCrash={crash} />
                             <button
                                 type="button"
-                                onClick={() => setCrash((c) => !c)}
+                                onClick={toggle}
                                 className="rounded-md border border-outline bg-surface-variant px-md py-xs text-body-sm text-on-surface hover:bg-surface"
                             >
                                 {crash ? 'render healthy' : 'crash the subtree'}

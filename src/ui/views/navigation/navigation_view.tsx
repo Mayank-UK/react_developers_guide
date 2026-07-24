@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
 import { SectionWrapper } from '../../components/section-wrapper';
 import { ContentGroupWrapper } from '../../components/content-group-wrapper';
 import { TextBlock } from '../../components/text-block';
 import { CodeBlock } from '../../components/code-block';
 import { Example } from '../../components/example';
+import {
+    setAuthed,
+    useMiniRouter,
+    type MiniLocation,
+    type NavOpts,
+} from './navigation_hooks';
 
 /**
  * NavigationView — how React Router turns a single-page app into something that
@@ -490,32 +495,6 @@ const MINI_USERS = [
     { id: '99', name: 'Grace' },
 ];
 
-type NavOpts = { replace?: boolean };
-
-/** Parsed out of the simulated URL string, mirroring what the real hooks give. */
-interface MiniLocation {
-    pathname: string;
-    search: URLSearchParams;
-    raw: string;
-}
-
-function parseLocation(path: string): MiniLocation {
-    const [pathname = '', query = ''] = path.split('?');
-    return { pathname, search: new URLSearchParams(query), raw: path };
-}
-
-/** Match a pathname against the mini route table → which screen + its params. */
-function matchRoute(pathname: string): { screen: string; id?: string } {
-    if (pathname === '/' || pathname === '') return { screen: 'home' };
-    if (pathname === '/users') return { screen: 'users' };
-    const m = pathname.match(/^\/users\/([^/]+)$/);
-    if (m) return { screen: 'userDetail', id: decodeURIComponent(m[1] ?? '') };
-    if (pathname === '/search') return { screen: 'search' };
-    if (pathname === '/dashboard') return { screen: 'dashboard' };
-    if (pathname === '/login') return { screen: 'login' };
-    return { screen: 'notFound' };
-}
-
 const HANDLE_TITLES: Record<string, string> = {
     home: 'Mini app — home',
     users: 'Mini app — users',
@@ -526,54 +505,11 @@ const HANDLE_TITLES: Record<string, string> = {
     notFound: 'Mini app — not found',
 };
 
-/* A tiny module-scoped auth store shared across mini-app instances, so the
- * guards demo behaves like a real session (sign in once, stay signed in). */
-let authed = false;
-const authListeners = new Set<() => void>();
-function setAuthed(v: boolean) {
-    authed = v;
-    authListeners.forEach((fn) => fn());
-}
-function useAuth() {
-    const [, force] = useState(0);
-    useEffect(() => {
-        const fn = () => force((n) => n + 1);
-        authListeners.add(fn);
-        return () => {
-            authListeners.delete(fn);
-        };
-    }, []);
-    return authed;
-}
-
 /** MiniApp — the simulated router. Owns the URL history stack + renders the
  *  matched screen inside a shared MiniLayout shell. */
 function MiniApp({ initialEntries }: { initialEntries: string[] }) {
-    const [stack, setStack] = useState<string[]>(() => [...initialEntries]);
-    const [idx, setIdx] = useState(0);
-    const authedNow = useAuth();
-
-    const navigate = (to: string, opts?: NavOpts) => {
-        if (opts?.replace) {
-            setStack((s) => s.map((p, i) => (i === idx ? to : p)));
-        } else {
-            setStack((s) => [...s.slice(0, idx + 1), to]);
-            setIdx((i) => i + 1);
-        }
-    };
-    const back = () => setIdx((i) => Math.max(0, i - 1));
-
-    const loc = parseLocation(stack[idx] ?? '');
-    const matched = matchRoute(loc.pathname);
-    const id = matched.id;
-    let screen = matched.screen;
-
-    // Guard: /dashboard requires auth — mirror <RequireAuth><Navigate/></RequireAuth>
-    let redirectedFrom: string | null = null;
-    if (screen === 'dashboard' && !authedNow) {
-        redirectedFrom = '/dashboard';
-        screen = 'login';
-    }
+    const { loc, screen, id, redirectedFrom, navigate, back, canGoBack } =
+        useMiniRouter(initialEntries);
 
     const body = renderScreen(screen, {
         id,
@@ -586,7 +522,7 @@ function MiniApp({ initialEntries }: { initialEntries: string[] }) {
             <MiniLayout
                 loc={loc}
                 screen={screen}
-                canGoBack={idx > 0}
+                canGoBack={canGoBack}
                 onBack={back}
                 onNavigate={navigate}
                 redirectedFrom={redirectedFrom}

@@ -1,5 +1,5 @@
 import LinkCard from '../../components/link_card';
-import { useHomeViewModel } from './home_view_model';
+import { useHomeNav } from './home_hooks';
 
 /**
  * Home — the top-level navigation hub. Mirrors the Flutter home screen: a grid
@@ -8,7 +8,7 @@ import { useHomeViewModel } from './home_view_model';
  */
 
 export default function HomeView() {
-    const { NAV_ITEMS } = useHomeViewModel();
+    const { NAV_ITEMS } = useHomeNav();
 
     return (
         <div className="flex flex-col gap-md p-md">

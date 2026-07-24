@@ -1,5 +1,5 @@
 import LinkCard from '../../components/link_card';
-import { useUiHubViewModel } from './ui_hub_viewmodel';
+import { useUiHubNav } from './ui_hub_hooks';
 
 /**
  * UiHubView — the navigation hub for the UI section. Groups the layout, styling,
@@ -8,7 +8,7 @@ import { useUiHubViewModel } from './ui_hub_viewmodel';
  */
 
 export default function UiHubView() {
-    const { NAV_ITEMS } = useUiHubViewModel();
+    const { NAV_ITEMS } = useUiHubNav();
 
     return (
         <div className="flex flex-col gap-md p-md">

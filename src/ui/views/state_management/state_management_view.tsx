@@ -3,7 +3,7 @@ import { ContentGroupWrapper } from '../../components/content-group-wrapper';
 import { TextBlock } from '../../components/text-block';
 import { CodeBlock } from '../../components/code-block';
 import LinkCard from '../../components/link_card';
-import { useStateManagementViewModel } from './state_management_viewmodel';
+import { useStateManagementNav } from './state_management_hooks';
 
 /**
  * StateManagementView — hub for the state-management section.
@@ -15,7 +15,7 @@ import { useStateManagementViewModel } from './state_management_viewmodel';
  * compare the mechanism, not the feature set.
  */
 export default function StateManagementView() {
-    const { NAV_ITEMS } = useStateManagementViewModel();
+    const { NAV_ITEMS } = useStateManagementNav();
 
     return (
         <div className="flex flex-col gap-md">

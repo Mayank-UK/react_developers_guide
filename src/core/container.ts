@@ -42,6 +42,12 @@ class Container {
         api: ApiScenario.Success,
         db: DbScenario.Success,
     };
+    /**
+     * Mutable mirror of `config.useFakeApi`. Kept separate from the immutable
+     * config so the API-handling screen can flip between the canned FakeApiService
+     * and the real jsonplaceholder data source at runtime via `setUseFakeApi`.
+     */
+    private useFakeApi = true;
     private fakeApi?: FakeApiService;
     private fakeDb?: FakeAppDatabase;
 
@@ -49,6 +55,7 @@ class Container {
         this.config = config;
         this.scenario.api = config.apiScenario;
         this.scenario.db = config.dbScenario;
+        this.useFakeApi = config.useFakeApi;
 
         // Eager singletons.
         this.register('AppConfig', config);
@@ -114,6 +121,25 @@ class Container {
         return this.scenario.db;
     }
 
+    /**
+     * Flip between the canned FakeApiService and the real jsonplaceholder data
+     * source at runtime. Swapping the source rebuilds the remote → repository →
+     * use case graph so consumers that resolve `getPostsUseCase` afresh (e.g. the
+     * `usePosts` hook, which re-reads it every render) pick up the new path and
+     * refetch. The live path still simulates failures because the http client's
+     * failure-injection interceptor reads the live API scenario.
+     */
+    setUseFakeApi(useFakeApi: boolean): void {
+        if (this.useFakeApi === useFakeApi) return;
+        this.useFakeApi = useFakeApi;
+        this.register('PostRemoteDataSource', this.createPostRemoteDataSource());
+        this.register('PostRepository', this.createPostRepository());
+        this.register('GetPostsUseCase', this.createGetPostsUseCase());
+    }
+    getUseFakeApi(): boolean {
+        return this.useFakeApi;
+    }
+
     /** Test-only: tear down registered singletons (e.g. close Dexie). */
     dispose(): void {
         const db = this.registry.get(key('AppDatabase'));
@@ -126,10 +152,13 @@ class Container {
     // ---- wiring helpers ----
 
     private createPostRemoteDataSource(): PostRemoteDataSource {
-        if (this.config.useFakeApi) {
+        if (this.useFakeApi) {
             this.fakeApi = new FakeApiService(this.scenario.api);
             return this.fakeApi;
         }
+        // Live path: real jsonplaceholder calls through the shared http client,
+        // whose failure-injection interceptor still honours the live API scenario.
+        this.fakeApi = undefined;
         return new JsonPlaceholderPostRemoteDataSource(this.httpClient);
     }
 
