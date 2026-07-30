@@ -15,8 +15,8 @@ import {
  * behaves like a multi-page site: the URL changes, back/forward work, deep
  * links land on the right screen, and only the changed parts re-render.
  *
- * React's standard is React Router (v7+ ships as the `react-router` package,
- * data-router API). Flutter's equivalent is `go_router`; the concepts line up
+ * React's standard is React Router (since v7 the unified `react-router` package
+ * ships the data-router API; this app runs v8). Flutter's equivalent is `go_router`; the concepts line up
  * closely but the wiring is data-driven in React.
  *
  * Every concept below ships a LIVE demo built on an isolated in-memory router

@@ -312,7 +312,7 @@ of each layer, and the app picks the standard React answer over a literal port:
   discriminated unions (Result<T>, Failure with a 'kind' tag), which is the
   type-safe React way to model "success or a categorised failure".
 
-• Routing — Flutter's go_router maps to React Router v7's data router
+• Routing — Flutter's go_router maps to React Router v8's data router
   (createBrowserRouter + RouterProvider), the current idiomatic API, rather
   than the older <BrowserRouter> component tree.
 

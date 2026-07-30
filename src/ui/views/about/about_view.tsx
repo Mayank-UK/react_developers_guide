@@ -128,7 +128,7 @@ you read here is what you'd reach for shipping a real app today.`}
                     defaultOpen
                     code={`UI / runtime      React 19, TypeScript
 Build / dev        Vite 8
-Routing            React Router v7 (data router)
+Routing            React Router v8 (data router)
 Styling            Tailwind v4 (CSS-variable tokens, @theme inline)
 State (local)      hooks + useReducer
 State (global)     Redux Toolkit, Zustand  (demonstrated side by side)

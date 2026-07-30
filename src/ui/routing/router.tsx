@@ -45,7 +45,7 @@ const UiHubView = lazy(() => import('../views/ui_hub/ui_hub_view'));
 /**
  * Route table as data — mirrors the Flutter `router.dart` GoRouter config.
  *
- * Note (React vs Flutter): Flutter uses `go_router`; React Router v7's idiomatic
+ * Note (React vs Flutter): Flutter uses `go_router`; React Router v8's idiomatic
  * API is the data router (`createBrowserRouter` + `<RouterProvider>`). A single
  * parent route renders the shared `RootLayout` (header + theme toggle) and every
  * screen renders into its `<Outlet/>`, so app chrome lives in one place instead
