@@ -3,7 +3,7 @@ import { ContentGroupWrapper } from '../../components/content-group-wrapper';
 import { TextBlock } from '../../components/text-block';
 import { CodeBlock } from '../../components/code-block';
 import LinkCard from '../../components/link_card';
-import { useStateManagementNav } from './state_management_hooks';
+import { STATE_MANAGEMENT_NAV_ITEMS } from './state_management_hooks';
 
 /**
  * StateManagementView — hub for the state-management section.
@@ -14,9 +14,8 @@ import { useStateManagementNav } from './state_management_hooks';
  * is trendy. Every sub-screen below implements the SAME todo example so you can
  * compare the mechanism, not the feature set.
  */
-export default function StateManagementView() {
-    const { NAV_ITEMS } = useStateManagementNav();
 
+export default function StateManagementView() {
     return (
         <div className="flex flex-col gap-md">
             <SectionWrapper title="Which state are you managing?">
@@ -65,7 +64,7 @@ Zustand, and TanStack Query each trade ceremony for power.`}
             </SectionWrapper>
 
             <nav className="grid grid-cols-1 gap-md pb-md sm:grid-cols-2 lg:grid-cols-3">
-                {NAV_ITEMS.map((item) => (
+                {STATE_MANAGEMENT_NAV_ITEMS.map((item) => (
                     <LinkCard key={item.route} item={item} />
                 ))}
             </nav>

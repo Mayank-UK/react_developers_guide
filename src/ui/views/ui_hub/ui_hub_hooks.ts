@@ -1,8 +1,8 @@
 import type { Link as LinkModel } from '../../../domain/models/link';
 import { RoutePaths } from '../../routing/routes';
 
-// Defining items inside the hook function body means the array is recreated on every render. For a static constant that never changes, this is pure waste.
-const NAV_ITEMS: readonly LinkModel[] = [
+// Module-scoped constant — a single stable array shared by every render.
+export const UI_HUB_NAV_ITEMS: readonly LinkModel[] = [
     {
         title: 'Layout and structure',
         route: RoutePaths.layoutStructure,
@@ -42,7 +42,3 @@ const NAV_ITEMS: readonly LinkModel[] = [
         description: 'Tokens (color/type/spacing/radius/shadow), @theme inline, light/dark.',
     },
 ];
-
-export function useUiHubNav() {
-    return { NAV_ITEMS };
-}

@@ -1,5 +1,6 @@
 import type { Table } from 'dexie';
 import { AppDatabaseException } from '../../../core/error-handling/exceptions';
+import { stringify } from '../../../core/error-handling/stringify';
 import {
   postDtoFromJson,
   type PostDTO,
@@ -53,9 +54,4 @@ export class PostDAO {
       });
     }
   }
-}
-
-function stringify(e: unknown): string {
-  if (e instanceof Error) return e.message;
-  return String(e);
 }

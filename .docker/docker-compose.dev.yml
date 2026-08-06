@@ -1,3 +1,5 @@
+name: react_developers_guide
+
 services:
   app:
     build:

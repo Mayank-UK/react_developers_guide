@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Post } from '../../domain/models/post';
 import type { Failure } from '../../core/error-handling/failures';
 import { FailureSeverity } from '../../core/error-handling/failures';
@@ -52,18 +52,35 @@ export function usePosts(
     getPostsUseCase: GetPostsUseCase = container.getPostsUseCase,
 ): UsePostsResult {
     const [state, dispatch] = useReducer(reducer, { status: 'idle' });
+    // Holds the AbortController for the most recent fetch so a new `fetch()`
+    // call can abort the previous one before kicking off its own.
+    const currentAbort = useRef<AbortController | null>(null);
 
     const fetch = useCallback(() => {
-        let cancelled = false;
+        // Abort the previous in-flight fetch so a slower stale request can't
+        // overwrite the result of a newer one (e.g. when the user refetches or
+        // the scenario changes before the first resolves). One controller per
+        // fetch; the signal is checked after the await — the underlying data
+        // path (usecase → repository → http-client) does not thread an
+        // AbortSignal to axios, so an outstanding network call is not truly
+        // cancelled at the transport layer; we only suppress its state-write.
+        if (currentAbort.current) {
+            currentAbort.current.abort();
+        }
+        const controller = new AbortController();
+        currentAbort.current = controller;
         void (async () => {
             dispatch({ type: 'fetch' });
-            const result = await getPostsUseCase.execute();
-            // `cancelled` is flipped by the cleanup closure below; the type
-            // checker can't see that cross-closure mutation, so it looks always
-            // false here. The guard is genuinely needed to avoid dispatching
-            // after unmount.
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            if (cancelled) return;
+            let result;
+            try {
+                result = await getPostsUseCase.execute();
+            } catch (e) {
+                if (controller.signal.aborted) return;
+                throw e;
+            }
+            // A newer fetch (or unmount) aborted this controller while the
+            // request was in flight — drop the stale result.
+            if (controller.signal.aborted) return;
             if (result.ok) {
                 dispatch({
                     type: 'loaded',
@@ -75,7 +92,7 @@ export function usePosts(
             }
         })();
         return () => {
-            cancelled = true;
+            controller.abort();
         };
     }, [getPostsUseCase]);
 

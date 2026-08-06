@@ -301,7 +301,7 @@ function QueryTodoDemo() {
                                     })
                                 }
                                 aria-label={`Remove ${t.text}`}
-                                className="rounded-sm px-xs text-caption text-on-surface-variant hover:bg-black/5 hover:text-on-surface"
+                                className="rounded-sm px-xs text-caption text-on-surface-variant hover:bg-on-surface/10 hover:text-on-surface"
                             >
                                 ✕
                             </button>

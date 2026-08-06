@@ -1,16 +1,18 @@
 import { Logger } from '../../core/config/logger';
-import { success } from '../../core/result';
+import { failed, success } from '../../core/result';
 import {
   AppDatabaseException,
   AppException,
 } from '../../core/error-handling/exceptions';
 import {
-  chainedCacheFailure,
   forwardNetworkFailure,
   mapExceptionToFailure,
   safeRepositoryCall,
 } from '../../core/error-handling/guards';
-import { CacheFailure } from '../../core/error-handling/failures';
+import {
+  CacheFailure,
+  FailureSeverity,
+} from '../../core/error-handling/failures';
 import type { Post } from '../../domain/models/post';
 import type { PostRepository } from '../../domain/repositories/post-repository';
 import type { AppDatabase } from '../local/app-database';
@@ -84,9 +86,15 @@ export class PostRepositoryImpl implements PostRepository {
         e instanceof AppDatabaseException
           ? e
           : new AppDatabaseException('Cache read failed', { cause: e });
-      const chained = new CacheFailure(dbError.message, upstreamFailure);
+      // Build the chained CacheFailure once — it is both the logged value and
+      // the returned failure. Critical because the cache was the last resort.
+      const chained = new CacheFailure(
+        dbError.message,
+        upstreamFailure,
+        FailureSeverity.Critical,
+      );
       this.logger.error(`Cache fallback also failed:\n${chained.chain}`);
-      return chainedCacheFailure(dbError, upstreamFailure);
+      return failed(chained);
     }
   }
 }

@@ -60,7 +60,13 @@ export function toAppException(error: unknown): AppException {
   return new ServerException('Unexpected error', { cause: error });
 }
 
-function axiosErrorToException(e: AxiosError): AppException {
+/**
+ * Map an axios error to a typed AppException. Single source of truth for the
+ * axios-code→exception mapping, used both by `guardedApiCall`/`toAppException`
+ * and by the retry interceptor (which needs to convert an exhausted axios error
+ * before re-throwing). Exported so the mapping is not duplicated at call sites.
+ */
+export function axiosErrorToException(e: AxiosError): AppException {
   // No response at all → connectivity / cancellation / cert problems.
   if (!e.response) {
     if (e.code === 'ECONNABORTED' || e.code === 'ETIMEDOUT') {
@@ -150,11 +156,10 @@ export async function safeRepositoryCall<TResult>({
       if (onServerError) return onServerError(e);
       return failed(mapExceptionToFailure(e));
     }
-    if (
-      e instanceof AppDatabaseException ||
-      e instanceof AuthException ||
-      e instanceof AppException
-    ) {
+    if (e instanceof AppException) {
+      // AppException is the base of AppDatabaseException / AuthException (and
+      // the Network/Server branches above), so this single branch subsumes
+      // every typed data-layer exception without special-case routing.
       return failed(mapExceptionToFailure(e));
     }
     logger.error('Unexpected repository error', e);

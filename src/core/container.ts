@@ -106,6 +106,21 @@ class Container {
 
     // ---- runtime scenario control (dev) ----
 
+    /**
+     * Value-based introspection of what the container actually wired, so UI
+     * readouts (e.g. the Dependency-management screen) can show "fake" vs
+     * "live" without `instanceof`-checking data-layer classes — preserving the
+     * invariant that `ui/` never couples to `data/` internals (see
+     * ARCHITECTURE.md). Driven by the live wiring knobs, so it reflects runtime
+     * swaps (e.g. `setUseFakeApi`) rather than the immutable AppConfig.
+     */
+    getWiring(): { remote: 'fake' | 'live'; db: 'fake' | 'live' } {
+        return {
+            remote: this.useFakeApi ? 'fake' : 'live',
+            db: this.config.useFakeDatabase ? 'fake' : 'live',
+        };
+    }
+
     setApiScenario(scenario: ApiScenario): void {
         this.scenario.api = scenario;
         this.fakeApi?.setScenario(scenario);

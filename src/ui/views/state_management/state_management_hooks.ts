@@ -1,8 +1,8 @@
 import type { Link as LinkModel } from '../../../domain/models/link';
 import { RoutePaths } from '../../routing/routes';
 
-// Module-scoped constant — never recreated per render (same rule as the home hub).
-const NAV_ITEMS: readonly LinkModel[] = [
+// Module-scoped constant — a single stable array shared by every render.
+export const STATE_MANAGEMENT_NAV_ITEMS: readonly LinkModel[] = [
     {
         title: 'Hooks',
         route: RoutePaths.hooks,
@@ -28,7 +28,3 @@ const NAV_ITEMS: readonly LinkModel[] = [
             'Server state — caching, loading/error, invalidation. Not a UI-state replacement.',
     },
 ];
-
-export function useStateManagementNav() {
-    return { NAV_ITEMS };
-}

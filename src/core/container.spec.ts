@@ -34,6 +34,29 @@ describe('container', () => {
         container.setDbScenario(DbScenario.Success);
     });
 
+    it('getWiring reports fake/live for remote and db from the live knobs', () => {
+        // Dev config wires fakes for both slots.
+        expect(container.getWiring()).toEqual({
+            remote: 'fake',
+            db: 'fake',
+        });
+
+        // Toggling the fake-api knob flips the remote readout live (the db knob
+        // is immutable AppConfig, so it stays fake here).
+        container.setUseFakeApi(false);
+        expect(container.getWiring()).toEqual({
+            remote: 'live',
+            db: 'fake',
+        });
+
+        // restore for other suites
+        container.setUseFakeApi(true);
+        expect(container.getWiring()).toEqual({
+            remote: 'fake',
+            db: 'fake',
+        });
+    });
+
     it('rebuilds the remote→repository→usecase graph when toggling fake api', () => {
         const before = container.getPostsUseCase;
         expect(container.getUseFakeApi()).toBe(true);

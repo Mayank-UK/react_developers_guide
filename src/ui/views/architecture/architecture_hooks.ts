@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Architecture screen custom hooks — own the state + logic for the two live
@@ -124,20 +124,23 @@ export function useRequestTracer(): RequestTracer {
         return () => window.clearTimeout(id);
     }, [running, active, steps.length]);
 
-    const run = () => {
-        setActive(0);
-        setRunning(true);
-    };
-
-    const reset = () => {
+    const reset = useCallback(() => {
         setRunning(false);
         setActive(-1);
-    };
+    }, []);
 
-    const toggleInjectFailure = (on: boolean) => {
-        setInjectFailure(on);
-        reset();
-    };
+    const run = useCallback(() => {
+        setActive(0);
+        setRunning(true);
+    }, []);
+
+    const toggleInjectFailure = useCallback(
+        (on: boolean) => {
+            setInjectFailure(on);
+            reset();
+        },
+        [reset],
+    );
 
     return {
         injectFailure,

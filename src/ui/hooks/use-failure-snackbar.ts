@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Failure } from '../../core/error-handling/failures';
 import { FAILURE_KIND_ICONS as FAILURE_ICONS } from '../failure-icons';
 
@@ -17,6 +17,10 @@ export { FAILURE_ICONS };
  * exactly once per warning via an effect. The toast auto-dismisses after a few
  * seconds. Critical failures use <ShowError/> instead — never this hook.
  */
+
+/** Max simultaneously visible toasts; beyond this the oldest is dropped. */
+const SNACKBAR_MAX = 3;
+
 export function useFailureSnackbar() {
   const [entries, setEntries] = useState<SnackbarEntry[]>([]);
   const nextId = useRef(0);
@@ -35,7 +39,12 @@ export function useFailureSnackbar() {
   const show = useCallback(
     (failure: Failure) => {
       const id = nextId.current++;
-      setEntries((prev) => [...prev, { id, failure }]);
+      setEntries((prev) => {
+        // Cap visible entries: keep the newest SNACKBAR_MAX, drop the oldest.
+        const next = [...prev, { id, failure }];
+        if (next.length > SNACKBAR_MAX) next.shift();
+        return next;
+      });
       const timer = window.setTimeout(() => {
         timers.current.delete(timer);
         dismiss(id);
@@ -45,5 +54,8 @@ export function useFailureSnackbar() {
     [dismiss],
   );
 
-  return { entries, show, dismiss };
+  // Memoize the returned object so consumers that depend on it in their own
+  // effect deps see a stable reference between renders (entries/show/dismiss are
+  // each referentially stable unless they actually change).
+  return useMemo(() => ({ entries, show, dismiss }), [entries, show, dismiss]);
 }

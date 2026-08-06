@@ -1,8 +1,8 @@
 import type { Link as LinkModel } from '../../../domain/models/link';
 import { RoutePaths } from '../../routing/routes';
 
-// Defining items inside the hook function body means the array is recreated on every render. For a static constant that never changes, this is pure waste.
-const NAV_ITEMS: readonly LinkModel[] = [
+// Module-scoped constant — a single stable array shared by every render.
+export const HOME_NAV_ITEMS: readonly LinkModel[] = [
     {
         title: 'React fundamentals',
         route: RoutePaths.reactFundamentals,
@@ -81,7 +81,3 @@ const NAV_ITEMS: readonly LinkModel[] = [
         description: 'Performance, efficiency, maintainability.',
     },
 ];
-
-export function useHomeNav() {
-    return { NAV_ITEMS };
-}

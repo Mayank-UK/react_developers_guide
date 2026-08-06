@@ -527,7 +527,7 @@ function ListDemo() {
                         <button
                             type="button"
                             onClick={() => remove(t.id)}
-                            className="rounded-sm px-xs text-caption text-on-surface-variant hover:bg-black/5"
+                            className="rounded-sm px-xs text-caption text-on-surface-variant hover:bg-on-surface/10"
                         >
                             remove
                         </button>

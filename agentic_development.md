@@ -1,83 +1,8 @@
-<!-- structure: raw --> <!-- when migrated to canonical shape, change to: canonical-YYYY-MM-DD -->
-
-- ⚙️ MAINTENANCE DIRECTIVE (standing rule — agent reads this first and follows it every time this file is opened)
-    - This file is the agent's LEAN WORKING MEMORY, not documentation. Keep it accurate and terse.
-    - Canonical structure (migrate ONCE if missing, then never again): Project snapshot → Invariants → Conventions → Decision log → Backlog. See sample_agentic_development.md for the shape.
-    - IDEMPOTENCY (do NOT redo work): check the `structure:` marker above.
-        - If `raw`: you may migrate the file into canonical shape ONCE this session, then flip the marker to `canonical-<today>`.
-        - If `canonical-*`: DELTA-ONLY. Do not restructure, re-migrate, or re-compress sections that are already in shape. Only patch the specific drift in front of you. If a section is already a one-liner, leave it.
-    - Per-open maintenance (cheap, delta-only):
-        - Fix the file map / paths against the real codebase as you discover drift (e.g. wrong `src/app/...` → real `src/ui/routing/...`).
-        - Flip status markers to match reality: ⏳ pending → 🚧 in progress → ✅ done. Mark ✅ ONLY when the item's DoD is met AND verified (build + tests + screenshot).
-        - When a discussion / pasted AI dialog is RESOLVED, collapse it to one line under Decision log and delete the long version.
-        - Every Backlog item keeps a one-line DoD; add one if missing.
-    - Token discipline: one-liners over prose; let code comments carry the detail; this file stays an INDEX. When in doubt, cut.
-
 - Requirements
-    - I want to implement a react project following code architecture similar to Development/personal/flutter/flutter_developers_guide, separating ui, domain, data layer, error handling, state management, etc
-    - Although I want similar implementation, but I prefer domain specificity, for example if something is done in react in standard way that is different from this, then better point it out and continue rather than just forcing it
-    - As you keep getting done with the tasks, you can replace "Pending" with "✅"
+    - As you keep getting done with the tasks, you can replace "⏳" with "✅"
 
 - One time setup for application architecture (Remove this after implementation)
-    - Most standard and optimium (for react) navigation and routing implementation ✅ (React Router v7 data router — createBrowserRouter + RouterProvider in src/app/app.tsx; a single shared RootLayout with <Outlet/> as parent route, per-page titles from route handle.title via useRouteTitle; paths in src/ui/routes.ts)
-    - Most standard and optimum (for react) Full clean architecture pipeline implementation from fetching posts usecase, repository, dto's, dao's, remote, local, etc; check flutter developers guide for reference ✅ (domain/ + data/ + GetPostsUseCase + PostRepositoryImpl with remote→cache fallback; remote split into http-client + post-remote-data-source + dtos; local split into app-database + daos/post-dao — see src/domain, src/data)
-    - Dependency management setup implementation ✅ (lightweight service locator in src/app/container.ts — React has no get_it/injectable standard; flagged in plan)
-    - Exception handling implementation, take reference from flutter_developers_guide ✅
-        - How it chains multiple exceptions, how it show in multiple ways like blocking, non-blocking, etc based on exception severity (src/core/error-handling: exceptions → guards → failures with chained cause + severity; src/ui/components/show-error.tsx blocking, src/ui/components/failure-snackbar.tsx non-blocking)
-    - Design system implementation ✅
-        - Implement the design system in the most standard way of react (Tailwind v4 + CSS-variable tokens, light/dark via ThemeProvider — src/ui/design-system)
-        - Look for reference implementation in flutter_developers_guide
-        - This has to be used through out the UI implementation
-    - Web vs mobile cleanup ✅ (this is a web app, not a mobile app — dropped mobile-only patterns: removed responsive/useResponsive breakpoints, replaced the per-screen Flutter PageScaffold/Scaffold+AppBar with a single shared RootLayout; browser provides back/scroll)
-    - Environments/flavours setup ✅ (Vite modes — .env.development / .env.staging / .env.production + dev:staging / build:staging scripts; differs from Flutter's separate main\_\*.dart entrypoints)
-    - Testing infrastructure ✅ (Vitest + jsdom + Testing Library seeded; npm test; smoke + error-pipeline tests in src/ui/views/home.spec.tsx, src/core/error-handling/guards.spec.ts)
-
-- Visual design / UX quality (polish pass) ✅
-    - Palette overhauled: neutral slate base + a single indigo accent (#4f46e5 light / #818cf8 dark), replacing the busy Material purple/teal. Accent used sparingly (links, focus, hover, small marks). Tokens in src/ui/design-system/tokens.css (names unchanged, values swapped).
-    - 3-tier layering for clear differentiation: gray canvas (bg-surface-tint page) → white section cards (bg-surface + border + shadow-button-card) → gray wells for code & examples (bg-surface-variant; CodeBlock solid border, Example dashed border with "↳ Live example" overline). New primitive src/ui/components/example.tsx.
-    - Code is collapsible: CodeBlock defaults to collapsed (▸/▾ toggle + copy always visible) — pages must never become a wall of code.
-    - Hierarchy + spacing: section title (accent bar + semibold) → ContentGroupWrapper overline label (uppercase, muted) → TextBlock body (leading-[1.7], on-surface-variant). Sections mb-lg apart; quiet header (surface + hairline border, accent only on logo); home rebuilt as clean white cards on gray canvas.
-    - RULE for all screens going forward: every demonstrable concept ships a VISIBLE, interactive example (local function wrapped in <Example/>), not just a CodeBlock description; and verify the rendered screen by screenshotting (dev server + `playwright`) before marking done.
-
-- A fix related to design system implementation ✅:
-    - I asked another AI that in my coding, for text, fonts, etc my css classes are a little complicated, and replied like below, I am not sure if that way if fine or not, you can decide:
-    - Question asked with AI
-        - I also see that text, etc are used like this in my css, not sure if it's fine or something not done properly
-        - font-[var(--font-mono)] text-[var(--text-caption)]
-    - Answer by AI
-        - The Problem
-            - Both of those are arbitrary value escapes — Tailwind's fallback syntax for unregistered tokens. They work, but they're a code smell in this context. They signal that your @theme inline block is incomplete.
-        - Here's the breakdown:
-            - font-[var(--font-mono)] — unnecessary. You already register --font-mono in @theme inline, so Tailwind already generates font-mono. You're doing extra work to get the same result.
-            - text-[var(--text-caption)] — broken by design. --text-caption is a font-size token from your type scale, but it's never registered under the --text-\* namespace in @theme inline, so Tailwind never generates text-caption. The arbitrary syntax works around that gap, but it's hiding a missing registration.
-        - Fix: Register your typography scale
-            - Add your type scale tokens to @theme inline under the --text-_ namespace — that's what Tailwind v4 uses to generate text-_ size utilities:
-                - @theme inline {
-                  /_ --- existing tokens --- _/
-                  --font-display: var(--font-display);
-                  --font-body: var(--font-body);
-                  --font-mono: var(--font-mono);
-                  /_ --- type scale (drives text-_ size utilities) --- \*/
-                  --text-display: var(--text-display);
-                  --text-headline: var(--text-headline);
-                  --text-title: var(--text-title);
-                  --text-body: var(--text-body);
-                  --text-label: var(--text-label);
-                  --text-caption: var(--text-caption);
-                  }
-            - Now write it cleanly:
-                - // Before — leaking implementation details into JSX
-                  <code className="font-[var(--font-mono)] text-[var(--text-caption)]" />
-
-                - // After — tokens are first-class Tailwind utilities
-                  <code className="font-mono text-caption" />
-
-            - The mental model
-                - Think of @theme inline as your contract between tokens.css and Tailwind. Every token you want usable as a utility class needs an explicit entry there. Arbitrary value syntax [var(--x)] should only appear in JSX when you genuinely need a one-off value with no design token behind it — not as a workaround for missing registrations.
-                - A useful audit rule: if [var(-- appears in your JSX, it almost always means a token is missing from @theme inline.
-
-    - If that's the case, then we will have to fix it in our project
-        - DONE: type scale registered under `--text-*` in `@theme inline` (index.css), so every font-size token is now a first-class `text-*` utility. All arbitrary escapes converted across the codebase — `font-[var(--font-mono)]`→`font-mono`, `text-[var(--text-caption)]`→`text-caption`, plus the same-smell color escapes (`[var(--color-primary)]`→`primary`, etc.) and layout escapes (`max-w-[var(--content-max-width)]`→`max-w-content` via `--container-content`, `h-[var(--header-height)]`→`h-header` via `@utility`). **Zero `[var(--` remain in JSX.** Tailwind screen's teaching prose rewritten to teach the new model (tokens first-class; `[ ]` only for true one-offs). Verified: build + 22 tests pass, tailwind screen screenshotted, all new utilities confirmed generated in built CSS.
+    - ✅
 
 - Generic instructions:
     - You have to build UI using the design system implemented in the application
@@ -86,71 +11,93 @@
     - If feeling confused about how to do things, you are free to check how it's done in other parts of this app; the goal is to maintain consistency throughout the app
     - Before proceeding to the next task, calculate if continuing the next task in this chat will be more token efficient or continuing in new chat, and recommend me when its better to move to new chat
 
-- Step by step instructions for screens
-    - React fundamentals screen ✅ (single consolidated screen — src/ui/views/react-fundamentals.tsx; sections for mental model, JSX, components & props, useState, events, conditional rendering, lists & keys, composition; live interactive demos as local functions using design-system primitives; smoke + interaction spec in react-fundamentals.spec.tsx)
+- Tasks
+    - React fundamentals screen ✅
         - Include everything fundamental to react
         - Put all react fundamentals in a single screen instead of separate screens like flutter
-    - Typescript/Javascript fundamentals screen ✅ (single consolidated screen — src/ui/views/ts-js-fundamentals.tsx; sections: JS vs TS, variables (let/const/var), primitives, type annotations & inference, objects/arrays/tuples, functions, control flow, operators (spread/destructure/nullish/optional-chaining), classes & interfaces, generics, async/await, modules, exceptions, utility types; live counter demo + smoke/interaction spec)
+    - Typescript/Javascript fundamentals screen ✅
         - Include all things like variables, consts, lool, conditions, etc
         - Put all typescript/javascript fundamentals in a single screen instead of separate screens like flutter
-    - UI section ✅ (/ui hub — src/ui/views/ui-hub.tsx; Links grid to the layout/styling/interaction sub-screens)
+    - UI section ✅
         - UI manipulation section
-            - Layout and structure screen ✅ (Page structure — src/ui/views/layout-structure.tsx; component-tree → DOM, shared RootLayout+Outlet pattern, semantic HTML, box model, Flexbox, CSS Grid, the app's layout primitives; live demos for box model / flex direction / grid columns + spec)
+            - Layout and structure screen ✅
             - Styling
-                - CSS screen ✅ (src/ui/views/css.tsx — how CSS works, selectors, the cascade & specificity, units (px/%/rem/em/vh), pseudo-classes, custom properties/CSS variables with live demos + spec)
-                - Bootstrap screen ✅ (src/ui/views/bootstrap.tsx — what Bootstrap is, the 12-column grid (live), ready-made components, utilities, vs Tailwind + spec)
-                - Tailwind screen ✅ (src/ui/views/tailwind.tsx — utility-first model, how this app wires tokens via @theme inline, everyday utilities, responsive/dark variants, trade-offs + spec)
-            - Interactive behaviours screen ✅ (src/ui/views/interactive.tsx — interactive states, hover/focus/focus-visible, transitions (live), @keyframes animations (live), accessibility incl. prefers-reduced-motion + spec)
+                - CSS screen ✅
+                - Bootstrap screen ✅
+                - Tailwind screen ✅
+            - Interactive behaviours screen ✅
                 - Like click, hover, focus, etc
-        - Responsive layout screen ✅ (src/ui/views/ui_hub/sub_views/responsive/responsive_view.tsx — mobile-first + viewport meta, Tailwind breakpoints table, everyday patterns hide/show/reflow/reorder, CSS @media under the hood, useMediaQuery hook for JS branching, container queries via slider-controlled box, testing via devtools/Playwright; live viewport readout + reflow grid + CQ slider + spec)
+        - Responsive layout screen ✅
             - How responsiveness is implemented in react in standard way like using bootstrap, tailwind, etc
-        - Design system screen ✅ (src/ui/views/ui_hub/sub_views/design_system/design_system_view.tsx — why tokens, color palette + on-* pairing (live swatches), typography scale specimen + 3 font families, spacing scale ruler, radius + elevation, the @theme inline → utility bridge + "no [var(" rule, light/dark via data-theme + ThemeProvider with a live toggle; spec covers headings/swatches/theme-flip)
-    - Lifecyle screen ✅ (src/ui/views/lifecycle/lifecycle_view.tsx — three phases, dependency-array semantics, mount/unmount with cleanup, cleanup-on-rerun, class-method→hook mapping table, StrictMode double-invoke; live demos: selective-deps effect log, mount/unmount ticker into a shared event log, rerun-cleanup log; spec covers headings/table/mount+cleanup/deps)
+        - Design system screen ✅
+    - Lifecyle screen ✅
         - Show how each and every lifecyle method is used
-    - Navigation and routing screen ✅ (single screen — src/ui/views/navigation/navigation_view.tsx; sections: mental model/SPA vs URL-as-state, routes-as-data + nested <Outlet/>, declarative vs imperative nav (Link/NavLink/useNavigate), dynamic :id + useParams, query strings + useSearchParams, route handles + useMatches (this app's useRouteTitle), redirects & '*' catch-all, guards via <RequireAuth> wrapper, lazy routes; one shared LIVE mini-app per concept. KEY: React Router forbids nesting <RouterProvider> inside the app router, so demos are a state-driven mini-router simulation (history stack + parsed params/search + guard redirect) — real API lives in the code blocks. spec covers headings + params + search + guard redirect; build + 37 tests pass; DOM-verified: 9 sections, no overflow, no HTML-nesting errors, sign-in flow works in browser)
-    - State management section ✅ (hub src/ui/views/state_management/state_management_view.tsx frames the 3 kinds of state — local / global client / server — then links to the 4 sub-screens; every sub-screen implements the SAME todo app so the reader compares mechanisms, not features; all wired in router.tsx, build + 48 tests pass, all 5 screens screenshotted with zero console/page errors)
+    - Navigation and routing screen ✅
+    - State management section ✅
         - I don't know in detail how these state managment solutions are used, but I know that they are popular, maybe they are not even used for what I am asking, I will let you reason and inform me
             - RESOLVED: informed via the hub's "which state are you managing?" framing + each screen's "when to use" prose — Hooks (local), Redux/Zustand (global client), TanStack Query (server). TanStack Query is NOT a UI-state replacement; it composes with the others.
-        - Hooks screen ✅ (src/ui/views/state_management/hooks/hooks_view.tsx — useState todo with add/toggle/remove/filter + a useReducer version of the same todo to show when a reducer wins; prose on derived state, lifting state up, Context; scoped demos; spec covers headings + add + filter)
+        - Hooks screen ✅
             - Implement a simple todo example
-        - Redux screen ✅ (src/ui/views/state_management/redux/redux_view.tsx — Redux Toolkit createSlice + configureStore, scoped <Provider>, typed useSelector/useDispatch; prose on single store + one-way flow + when Redux is worth it; spec covers headings + dispatch-add)
+        - Redux screen ✅
             - Implement a simple todo example
-        - Zustand screen ✅ (src/ui/views/state_management/zustand/zustand_view.tsx — create() store, no provider, selector-based reads; prose on the sweet spot + "select a slice, never the whole store"; spec covers headings + add)
+        - Zustand screen ✅
             - Implement a simple todo example
-        - TanStack query screen ✅ (src/ui/views/state_management/tanstack_query/tanstack_query_view.tsx — fake async todo API w/ latency + failure switch, scoped QueryClientProvider, useQuery loading/error/refetch + useMutation invalidate; prose on server vs client state + the keyed cache; spec covers headings + loading + mutation-refetch)
+        - TanStack query screen ✅
             - Implement a simple todo example
-    - API handling ✅ (src/ui/views/api_handling/api_handling_view.tsx — walks the real pipeline layer-by-layer: use case → repository contract → DTO → remote data source + http client (interceptors) → Result; live demo drives the actual usePosts → GetPostsUseCase → PostRepositoryImpl with an API-scenario selector showing loading/success and the offline-first cache fallback (non-blocking warning) vs empty-cache blocking ShowError; React-vs-Flutter notes inline. spec covers headings + posts-loaded + cache fallback; build + 51 tests pass, screenshotted with zero console errors)
+    - API handling ✅
         - Implement a simple fetching of posts and displaying like done in flutter_developers_guide with full pipeline like usecase, repository, etc if it's done in react this way
         - Implement API handling screen where an example is implemented to fetch and show posts explaining how it's done
-    - Database handling ✅ (src/ui/views/database_handling/database_handling_view.tsx — why a write-through cache; AppDatabase abstract contract; AppDatabaseImpl as the only Dexie/IndexedDB import (schema + versions); PostDAO per-table query owner that upgrades engine errors to AppDatabaseException; how the repository uses it (write-through + offline fallback, cross-link to API screen); errors → DatabaseFailure/CacheFailure; live demo writes/reads container.appDatabase with a DB-scenario selector showing typed AppDatabaseExceptions on read/write errors; React-vs-Flutter notes (Dexie/IndexedDB vs sqflite). spec covers headings + write/read + read-error; build + 54 tests pass, screenshotted with zero console errors)
+    - Database handling ✅
         - Although I assume that database handling is already implemented in the previous step while implementing API handling pipeline
         - Implement Database handling screen explaining how it's done
-    - Exception handling ✅ (src/ui/views/exception_handling/exception_handling_view.tsx — the two-type model: AppException (data-layer, technical, chained cause, never shown) vs Failure (user-facing, kind + severity); the three guards guardedApiCall / mapExceptionToFailure / safeRepositoryCall; the exception→failure→severity map; severity → blocking <ShowError/> vs non-blocking snackbar; cause-chaining + the chain trace; live demo runs the real GetPostsUseCase with API×cache scenario matrix showing success / non-blocking warning (cache fallback) / blocking failure / chained CacheFailure, with a Failure detail card (kind, severity badge, chain) + the actual ShowError/Snackbar treatment; React-vs-Flutter notes. spec covers headings + warning-path + blocking-path; build + 57 tests pass, screenshotted (chained failure) with zero console errors)
+    - Exception handling ✅
         - Although I assume it's also done during the API handling
         - Implement Exception handling screen explaining how it's done
-    - Dependency management ✅ (src/ui/views/dependency_management/dependency_management_view.tsx — why DI (decouple build-from-use, testability, single wiring place); React has no DI standard — options weighed (Context / InversifyJS / hand-rolled locator) and why locator here; the container (symbol-keyed registry + typed accessors); the wiring graph (initialize() builds singletons in dependency order) + object-graph diagram; config-driven impl selection (useFakeApi/useFakeDatabase swap impl, same consumers); runtime scenario control (mutable holder captured by reference); bootstrap in main.tsx; live "wiring inspector" reads the real container via instanceof to show fake-vs-real slots + API/DB scenario selectors calling container.setApiScenario/setDbScenario; React-vs-Flutter (get_it + @injectable codegen vs hand wiring). spec covers headings + fakes-shown + runtime scenario flip; build + 60 tests pass, screenshotted with zero console errors)
+    - Dependency management ✅
         - Implement dependency management screen explaining how it's done in react
-    - Architecture screen ✅ (src/ui/views/architecture/architecture_view.tsx — why layers; the four layers (domain/data/core/ui) as a contract; the dependency rule (arrows point inward) + the composition-root exception; GetPosts flow traced layer-by-layer; the real src/ tree annotated by layer; three payoffs (testability/swappability/framework isolation); React-vs-Flutter idioms (useReducer hook vs Bloc, hand-rolled locator vs get_it, discriminated-union Result vs sealed class, data router vs go_router). Two live demos: a clickable layer explorer (select a layer → its owns / may-depend-on / may-NOT / real files) and a request-flow tracer (Run walks ui→domain→data→core→back, with an "inject network failure" toggle that shows the extra exception→Failure boundary). spec covers headings + layer-explorer swap + tracer run; build + 63 tests pass, screenshotted with zero console errors)
+    - Architecture screen ✅
         - Explaining how code is architectured in react in most maintainale way
-    - Testing ✅ (src/ui/views/testing/testing_view.tsx — why test; the stack (Vitest + jsdom + Testing Library + jest-dom); the two kinds in this codebase (pure-unit guards.spec.ts vs full-provider-tree smoke/interaction specs); test-behaviour-not-implementation (query by role/text, no instance/snapshot); async with waitFor for the data router; how to run (npm test / test:watch / path filter); React-vs-Flutter (flutter_test/integration_test, widget-tree vs jsdom, Key/Type vs role/text). Live demo: a real Counter component with three behavioural assertions and a bug toggle that turns the suite red — run green, flip bug, run red, read the expected-vs-actual. spec covers headings + green-then-red; build + 71 tests pass, screenshotted with zero console errors)
+    - Testing ✅
         - Implement tests ✅ (Vitest infra + smoke/error-pipeline tests in place; expand per-layer coverage as each screen lands)
         - Impelement testing screen explaining how it's done in react ✅ (see above)
-    - Debugging screen ✅ (src/ui/views/debugging/debugging_view.tsx — three toolboxes; the app's own Logger (level-gated, env-aware); browser DevTools (console/sources+breakpoints via sourcemaps/network/Vite overlay); React DevTools (component tree + hooks + Profiler "why did this render"); error boundaries (getDerivedStateFromError + componentDidCatch, the only thing that catches render crashes); reading the chained Failure trail; React-vs-Flutter (Flutter DevTools vs browser+React DevTools, ErrorWidget.builder vs must-add-yourself boundary). Two live demos: a Logger playground emitting at each level with a production-gate toggle showing the dropped lines, and a real error boundary that catches a triggered render crash and shows the Error.message instead of white-screening. spec covers headings + boundary-catches-crash; screenshotted with zero console errors)
+    - Debugging screen ✅
         - Explaining how debugging is done in react ✅ (see above)
-    - Environments/Flavours for dev, staging, and prod ✅ (src/ui/views/environments/environments_view.tsx — what an environment is; Vite modes (--mode selects .env.<mode> + import.meta.env.MODE, the single switch); the three .env files side-by-side as policy; VITE_ prefix opt-in + secret caveat; the config flow (createAppConfig is the only reader of import.meta.env → container.initialize); what differs (baseUrl / useFake* forced off outside dev / enableLogs gate); npm scripts per mode; React-vs-Flutter (build modes vs main_*.dart entrypoints + flavours + --dart-define). Live demo: a table running the real createAppConfig against each env block (shows fakes forced false in staging/prod, logs off in prod) + a banner reading the live container config. spec covers headings + per-env columns + live banner; screenshotted with zero console errors)
-        - Implement different environments ✅ (Vite modes + .env.{development,staging,production} + dev:staging/build:staging scripts)
-        - Implement evironment screen explaining how it's done in react ✅ (see above)
-    - Best practices screen ✅ (src/ui/views/best_practices/best_practices_view.tsx — mental model (render is cheap until it isn't, profile before optimising); stable keys (never index keys — correctness not perf); memoization trio (useMemo/useCallback/React.memo and the cost they carry, arrive as a set); code-splitting via React.lazy + Suspense at route level; effects as last resort (derive in render, never via state+effect); accessibility via semantic HTML (and how it makes Testing Library queries work); maintainability via composition + single-responsibility; React-vs-Flutter (Key↔Key, const↔memo, useEffect↔lifecycle, semantics). Live demo: side-by-side memo comparison — typing in the parent input climbs the no-memo column's render numbers while the useMemo+React.memo column stays flat, counted via real refs. spec covers headings + comparison renders + input; screenshotted with zero console errors)
-        - Explaining how things are done in best way in react for performance, efficiency, maintainance, etc ✅ (see above)
-    - Drawer ✅ (no desktop drawer — the header carries an inline "About" link directly; on mobile the header shrinks to a ☰ hamburger that opens a slide-in drawer holding the About link. Backdrop + Escape + link-tap all close it; drawer auto-closes on route change. src/ui/components/root-layout.tsx — responsive via Tailwind `md:` (inline link `hidden md:inline-block`, hamburger `md:hidden`, drawer `md:hidden`), Drawer is a local component (single-file use). New About page src/ui/views/about/about_view.tsx (what the app is, stat tiles, what-it-covers link grid, the stack, how it's built, conventions) wired at /about + an About card on the home grid. Back arrow now shows everywhere except home (was hidden on /about → fixed a trap where About had no way back). spec covers about content + hamburger→dialog open; build + 73 tests pass, screenshotted desktop (inline link + back arrow) and mobile (drawer open) with zero console errors)
+    - Environments/Flavours for dev, staging, and prod ✅
+        - Implement different environments ✅
+        - Implement evironment screen explaining how it's done in react ✅
+    - Best practices screen ✅
+        - Explaining how things are done in best way in react for performance, efficiency, maintainance, etc ✅
+    - Drawer ✅
+    - Review code and refactor to take implementation to 10/10 ✅
+        - Review from the perspective of a developer who has 10 years of experience in react and 30 years of experience in Software development, who knows all the best practices and bad practices, whose code is simple to understand yet robust
+        - Review how architecture is implemented
+        - Review how design system is implemented
+        - Review how hook files and logic inside them are implemented, if this is even standard or just spaghetti code
+        - Review all other aspects
 
-**Every Backlog item is now ✅ — the full guide is complete: 18 screens, responsive header + mobile drawer, 89 passing tests.**
+- Architecture-invariant + correctness refactor pass ✅ (2026-08-06)
+    - Durable decisions:
+        - UI views no longer import `PostDTO` (data layer); sample/seed post arrays typed as the domain `Post` (database_handling_hooks, exception_handling_hooks). Enforces the ARCHITECTURE.md invariant "a view never imports a DTO".
+        - Added `container.getWiring(): { remote: 'fake'|'live'; db: 'fake'|'live' }` as the value-based introspection of live wiring. dependency_management_hooks now reads this instead of `instanceof FakeApiService/FakeAppDatabase`, and `useFakeApi`/`remoteIsFake`/`dbIsFake` reflect runtime swaps rather than immutable AppConfig.
+        - Promoted the `stringify(e)` helper to `core/error-handling/stringify.ts` (pure, single source of truth); reused by `PostDAO` and `database_handling_hooks`.
+        - Consolidated the axios-code→exception mapping: `axiosErrorToException` is now exported from `guards.ts` and the retry interceptor delegates to it (duplicate local `toNetworkException` removed).
+        - Retry interceptor no longer retries errors that are already `AppException`s (failure-injection simulated failures short-circuit the retry loop instead of becoming 3-attempt runs).
+    - Correctness fixes:
+        - `post-repository-impl` cache-fallback builds the chained `CacheFailure` once and returns `failed(chained)` (was building it twice).
+        - `use-failure-snackbar` return object memoized (`useMemo` over already-`useCallback` show/dismiss).
+        - `use-posts` migrated from a `cancelled` flag to `AbortController` per in-flight fetch; previous fetch is aborted; state-writes suppressed on abort. NOTE: the underlying data path (usecase → repository → http-client) does not thread an AbortSignal to axios, so the network call itself is not transport-cancelled — documented inline.
+        - `guards.ts` redundant `AppDatabaseException || AuthException || AppException` cascade collapsed to a single `AppException` branch (base subsumes the others).
+    - Design-system polish:
+        - Copy-button hover switched from `hover:bg-black/5` (near-invisible in dark mode) to token-driven `hover:bg-on-surface/10` across code-block + hooks/redux/zustand/tanstack_query/react_fundamentals views.
+        - Distinct failure icons: `database` glyph changed 🗄 → 🛢 so cache and database severities are distinguishable.
+    - Tests: added `container.getWiring` spec (3 assertions) and `stringify.spec.ts` (4 cases). Suite now 94 passing (was 89).
 
-- Decision log (post-completion enhancements)
-    - 2026-07-24 — API-handling demo: extracted a real per-screen view model `useApiHandlingDemo` (src/ui/views/api_handling/api_handling_view_model.ts) so PostsDemo is a pure render. Kept the home/ui-hub view models as-is for consistency even though they only return a static NAV_ITEMS constant (recognised as premature abstraction but retained for the uniform one-view-model-per-screen convention).
-    - 2026-07-24 — Posts now fetch from a real placeholder API: added a runtime fake/live data-source toggle. Container gained a mutable `useFakeApi` holder + `setUseFakeApi`/`getUseFakeApi` that rebuild the remote→repository→useCase graph on swap. "live" hits jsonplaceholder.typicode.com/posts through the real http client (failure-injection interceptor still honours the API scenario, so network/server errors work in both modes). usePosts re-resolves `container.getPostsUseCase` each render, so the rebuilt singleton identity triggers its dep-driven refetch — no manual fetch needed on swap.
-    - 2026-07-24 — Added a "simulate cache read error" control to the API demo (DbScenario.ReadError). Combined with a remote failure it drives the chained CacheFailure path (cause → network failure), the only screen that demonstrates error compounding; renders as a blocking ShowError. Two cache switches (empty / read-error) resolve to a single DbScenario via effectiveDbScenario (read-error wins).
-    - Verified: build + 89 tests pass; api screen screenshotted in fake (3 posts), live (100 posts), and chained-failure (blocking ShowError) modes with zero unexpected console errors.
-    - 2026-07-24 — View-model separation rolled out across the orchestration ("Group B") screens. Each now has a `*_view_model.ts` owning its demo's state + logic, leaving the view a pure render: architecture (useLayerExplorer + useRequestTracer), database_handling (useCacheDemo), debugging (useLoggerDemo + useCrashDemo), dependency_management (useWiringDemo), exception_handling (usePipelineDemo), navigation (useMiniRouter + the auth store/matching moved out of the view). Teaching screens (react/ts-js fundamentals, lifecycle, best_practices, testing, state_management/*) left inline deliberately — their useState/useEffect IS the lesson; extracting would hide the concept being taught. Note: home/ui-hub view models retained for consistency even though they only return a static NAV_ITEMS constant. Verified: build + lint clean, 89 tests pass, all 6 screens screenshotted + demos exercised with zero unexpected console errors.
-    - 2026-07-31 — Favicon: replaced the default Vite lightning-bolt `public/favicon.svg` with an app-icon style mark — indigo (`--color-primary` #4f46e5) rounded-square tile + white React atom (three orbits + nucleus) on top, matching the SDG sibling site's tiled treatment so both guides share one visual style. `index.html` already references `/favicon.svg` — no wiring change. Verified SVG well-formed + rendered.
-    - 2026-07-24 — DROPPED the "view model" naming convention entirely. Rationale: "view model" is an Android/iOS concept (a long-lived object holding screen state + exposing reactive streams, one per screen by framework contract). Our hooks are none of that — they're plain custom hooks whose return value is rebuilt every render, die on unmount, and which a screen may freely compose N of. Forcing the mobile term caused the Demo/ViewModel suffix mix and the split-vs-merge debate. Rename: all 10 `*_view_model.ts(x)`/`*_viewmodel.tsx` → `*_hooks.ts` (`.ts`, no JSX); dropped the `ViewModel` suffix from the 3 hub hooks (useHomeViewModel→useHomeNav, useUiHubViewModel→useUiHubNav, useStateManagementViewModel→useStateManagementNav); kept descriptive names elsewhere (useLayerExplorer/useRequestTracer/useLoggerDemo/useCrashDemo/useMiniRouter/usePipelineDemo/useCacheDemo/useWiringDemo/useApiHandlingDemo). Header comments updated "view model"→"custom hooks". Convention going forward: a screen has a co-located `*_hooks.ts` holding as many `use…` hooks as it needs — no one-per-screen rule. Verified: tsc clean, build OK, 89 tests pass.
+- Polish pass (2026-08-06)
+    - Removed ceremonial hooks (`useHomeNav`/`useUiHubNav`/`useStateManagementNav`) → plain `HOME_NAV_ITEMS`/`UI_HUB_NAV_ITEMS`/`STATE_MANAGEMENT_NAV_ITEMS` exports; updated consumers.
+    - `architecture_hooks` `useRequestTracer` callbacks (`run`/`reset`/`toggleInjectFailure`) memoized with `useCallback`.
+    - failure-injection `Timeout` case now throws `TimeoutException` (preserves Timeout-vs-Network distinction through `mapExceptionToFailure`).
+    - http-client error log now includes `err.code` + `err.response?.status` (AxiosError `message` is generic).
+    - Display type-scale tokens (`--text-display-*`) made responsive via `clamp()` so they no longer overflow small phones; token names unchanged.
+    - Failure snackbar capped at `SNACKBAR_MAX = 3` (drops oldest); added `use-failure-snackbar.spec.tsx` (2 cases). Suite now 96 passing.
+    - Deferred (low value / teaching-intent-dependent, intentionally not done): tanstack_query demo module-level mutables, `use-route-title` `findLast` rewrite, `show-error` icon aria-label, `container` getter guard messaging.
+

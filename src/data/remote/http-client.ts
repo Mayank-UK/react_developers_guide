@@ -57,7 +57,10 @@ export function createHttpClient(deps: HttpClientDeps): AxiosInstance {
         return res;
       },
       (err: AxiosError) => {
-        logger.warning(`✗ ${err.config?.url ?? 'request'} failed`, err.message);
+        logger.warning(
+          `✗ ${err.config?.url ?? 'request'} failed`,
+          `code=${err.code ?? 'n/a'} status=${err.response?.status ?? 'n/a'} ${err.message}`,
+        );
         return Promise.reject(err);
       },
     );

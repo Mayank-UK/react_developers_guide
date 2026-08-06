@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { container } from '../../../core/container';
 import { DbScenario } from '../../../core/scenario/db-scenario';
-import { AppDatabaseException } from '../../../core/error-handling/exceptions';
-import type { PostDTO } from '../../../data/remote/dtos/post-dto';
+import { stringify } from '../../../core/error-handling/stringify';
+import type { Post } from '../../../domain/models/post';
 
 /**
  * Database-handling screen custom hooks — own the CacheDemo's state + logic so
  * the view stays a pure render. Drives the real container.appDatabase, flips
  * the dev DbScenario, and exposes write/read handlers plus the async cache
  * state machine (idle / reading / read / error).
+ *
+ * Note: the sample seed is typed as the domain `Post`, never the data-layer
+ * `PostDTO` — a view depends only on domain models (see ARCHITECTURE.md).
  */
 
-const SAMPLE_POSTS: PostDTO[] = [
+const SAMPLE_POSTS: Post[] = [
     { id: 1, title: 'Cached post', body: 'Written to the local store.' },
     {
         id: 2,
@@ -24,7 +27,7 @@ type CacheState =
     | { status: 'idle' }
     | { status: 'reading' }
     | { status: 'error'; message: string }
-    | { status: 'read'; posts: PostDTO[] };
+    | { status: 'read'; posts: Post[] };
 
 export interface CacheDemo {
     scenario: DbScenario;
@@ -54,13 +57,7 @@ export function useCacheDemo(): CacheDemo {
             await db.insertPosts(SAMPLE_POSTS);
             setNote(`Wrote ${SAMPLE_POSTS.length} posts to the cache.`);
         } catch (e) {
-            const msg =
-                e instanceof AppDatabaseException
-                    ? e.message
-                    : e instanceof Error
-                      ? e.message
-                      : String(e);
-            setNote(`AppDatabaseException: ${msg}`);
+            setNote(`AppDatabaseException: ${stringify(e)}`);
         }
     }, [db]);
 
@@ -71,13 +68,7 @@ export function useCacheDemo(): CacheDemo {
             const posts = await db.getPosts();
             setCache({ status: 'read', posts });
         } catch (e) {
-            const msg =
-                e instanceof AppDatabaseException
-                    ? e.message
-                    : e instanceof Error
-                      ? e.message
-                      : String(e);
-            setCache({ status: 'error', message: msg });
+            setCache({ status: 'error', message: stringify(e) });
         }
     }, [db]);
 

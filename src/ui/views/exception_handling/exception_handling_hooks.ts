@@ -4,13 +4,16 @@ import { useFailureSnackbar } from '../../hooks/use-failure-snackbar';
 import { ApiScenario } from '../../../core/scenario/api-scenario';
 import { DbScenario } from '../../../core/scenario/db-scenario';
 import { Failure } from '../../../core/error-handling/failures';
-import type { PostDTO } from '../../../data/remote/dtos/post-dto';
+import type { Post } from '../../../domain/models/post';
 
 /**
  * Exception-handling screen custom hooks — own the PipelineDemo's state + logic.
  * Drives the real GetPostsUseCase, holds the api/db scenario selectors + the
  * running/outcome state machine, seeds the cache once on mount so the fallback
  * paths have data, and surfaces non-blocking warnings via the snackbar.
+ *
+ * Note: the seed is typed as the domain `Post`, never the data-layer `PostDTO`
+ * — a view depends only on domain models (see ARCHITECTURE.md).
  */
 
 export type Outcome =
@@ -18,7 +21,7 @@ export type Outcome =
     | { ok: false; failure: Failure };
 
 /** Posts written straight to the cache on mount so fallback paths have data. */
-const SEED_POSTS: PostDTO[] = [
+const SEED_POSTS: Post[] = [
     { id: 1, title: 'Cached post', body: 'Seeded so the fallback can serve it.' },
     { id: 2, title: 'Second cached post', body: 'Also in the local store.' },
 ];

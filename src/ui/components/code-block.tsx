@@ -58,7 +58,7 @@ export function CodeBlock({ code, language, caption, defaultOpen = false }: Code
         <button
           type="button"
           onClick={(e) => void copy(e)}
-          className="rounded-sm px-xs text-caption text-on-surface-variant hover:bg-black/5 hover:text-on-surface"
+          className="rounded-sm px-xs text-caption text-on-surface-variant hover:bg-on-surface/10 hover:text-on-surface"
         >
           {copied ? '✓ copied' : 'copy'}
         </button>

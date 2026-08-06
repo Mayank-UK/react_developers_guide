@@ -10,6 +10,6 @@ export const FAILURE_KIND_ICONS: Record<FailureKind, string> = {
   server: '☁︎',
   cache: '🗄',
   auth: '🔒',
-  database: '🗄',
+  database: '🛢',
   unknown: '⚠︎',
 };

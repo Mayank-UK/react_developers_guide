@@ -6,6 +6,7 @@ import { ApiScenario } from '../../../core/scenario/api-scenario';
 import {
   NetworkException,
   ServerException,
+  TimeoutException,
 } from '../../../core/error-handling/exceptions';
 
 /**
@@ -34,7 +35,7 @@ export class FailureInjectionInterceptor {
         case ApiScenario.NetworkError:
           throw new NetworkException('Simulated no internet connection');
         case ApiScenario.Timeout:
-          throw new NetworkException('Simulated request timed out');
+          throw new TimeoutException('Simulated request timed out');
         case ApiScenario.ServerError:
           throw new ServerException('Simulated server returned 500');
         case ApiScenario.InvalidJson:
