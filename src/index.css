@@ -80,6 +80,42 @@
     height: var(--header-height);
 }
 
+/*
+ * Route-change progress bar (RootLayout) — a thin indeterminate-style top bar
+ * shown while a lazy route chunk loads. Pure CSS transitions, no JS timers:
+ * becoming active fades in fast and creeps toward ~85% with a long ease-out so
+ * a slow chunk reads as "progress" instead of a frozen page; going idle has no
+ * transition, so the bar vanishes the frame the new view commits. The primary
+ * accent token keeps it on-theme in light and dark mode.
+ */
+.route-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    height: 2px;
+    pointer-events: none;
+    background: var(--color-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 0;
+}
+
+.route-progress--active {
+    opacity: 1;
+    transform: scaleX(0.85);
+    transition:
+        transform 8s cubic-bezier(0.05, 0.6, 0.15, 1),
+        opacity 100ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .route-progress--active {
+        transition: opacity 100ms ease-out;
+    }
+}
+
 :root {
     color-scheme: light;
 }

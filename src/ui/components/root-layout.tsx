@@ -1,8 +1,16 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { Link, Outlet, ScrollRestoration, useLocation, useNavigate } from 'react-router';
+import {
+    Link,
+    Outlet,
+    ScrollRestoration,
+    useLocation,
+    useNavigate,
+    useNavigation,
+} from 'react-router';
 import { ThemeToggle } from './theme-toggle';
 import { useRouteTitle } from '../hooks/use-route-title';
 import { RoutePaths } from '../routing/routes';
+import { preloadRouteChunks } from '../routing/route-chunks';
 
 /**
  * RootLayout — the single shared app shell: a header (home link + current page
@@ -27,6 +35,11 @@ export function RootLayout() {
     const title = useRouteTitle();
     const navigate = useNavigate();
     const location = useLocation();
+    // Non-idle while a lazy route chunk is loading (every route carries a
+    // router-level `lazy` companion — see router.tsx): drives the top progress
+    // bar below. Covers link clicks, browser back/forward, and form submits.
+    const navigation = useNavigation();
+    useRouteChunkPreload();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const hamburgerRef = useRef<HTMLButtonElement>(null);
 
@@ -36,6 +49,8 @@ export function RootLayout() {
 
     return (
         <div className="flex min-h-full flex-col bg-surface-tint text-on-surface">
+            <RouteProgressBar active={navigation.state !== 'idle'} />
+
             <header className="sticky top-0 z-20 flex h-header items-center gap-md border-b border-outline bg-surface px-lg">
                 {canGoBack && (
                     <button
@@ -106,6 +121,55 @@ export function RootLayout() {
             )}
         </div>
     );
+}
+
+/**
+ * RouteProgressBar — the thin top bar shown while a lazy route chunk is
+ * loading. The element is always mounted and the `route-progress--active`
+ * state class drives its CSS transitions (index.css), so it appears the frame
+ * a navigation starts and hides the frame the new view commits, errors, or the
+ * navigation is interrupted. aria-hidden: purely visual feedback — the shared
+ * <Suspense> "Loading…" fallback remains the screen-reader signal.
+ */
+function RouteProgressBar({ active }: { active: boolean }) {
+    return (
+        <div
+            aria-hidden
+            className={`route-progress${active ? ' route-progress--active' : ''}`}
+        />
+    );
+}
+
+/**
+ * Intent-based route chunk prefetch: delegated capture-phase listeners on the
+ * document (mouseover ≈ delegated mouseenter, focusin for keyboard, pointerdown
+ * for touch taps). When pointer or focus lands inside any in-app link, resolve
+ * the link's pathname against the route-keyed chunk registry and start its
+ * not-yet-fetched chunk (route-chunks.ts fires each at most once) — so by
+ * click time the chunk is in flight or cached. Delegation instead of a
+ * wrapper <Link> keeps every existing link site (header, drawer, home cards,
+ * hub cards) untouched and covers future ones.
+ */
+function useRouteChunkPreload() {
+    useEffect(() => {
+        const onIntent = (event: Event) => {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            const anchor = target.closest('a[href]');
+            if (!(anchor instanceof HTMLAnchorElement)) return;
+            // Same-origin paths only — external links and mailto: have no chunk.
+            if (anchor.origin !== window.location.origin) return;
+            preloadRouteChunks(anchor.pathname);
+        };
+        document.addEventListener('mouseover', onIntent, { capture: true });
+        document.addEventListener('focusin', onIntent, { capture: true });
+        document.addEventListener('pointerdown', onIntent, { capture: true });
+        return () => {
+            document.removeEventListener('mouseover', onIntent, { capture: true });
+            document.removeEventListener('focusin', onIntent, { capture: true });
+            document.removeEventListener('pointerdown', onIntent, { capture: true });
+        };
+    }, []);
 }
 
 /** Focusable-element selector for the focus trap. */

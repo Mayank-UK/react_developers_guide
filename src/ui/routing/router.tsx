@@ -6,41 +6,90 @@ import {
     type RouteObject,
 } from 'react-router';
 import { RoutePaths } from './routes';
+import {
+    importAboutView,
+    importApiHandlingView,
+    importArchitectureView,
+    importBestPracticesView,
+    importBootstrapView,
+    importCssView,
+    importDatabaseHandlingView,
+    importDebuggingView,
+    importDependencyManagementView,
+    importDesignSystemView,
+    importEnvironmentsView,
+    importExceptionHandlingView,
+    importHomeView,
+    importHooksView,
+    importInteractiveView,
+    importLayoutStructureView,
+    importLifecycleView,
+    importNavigationView,
+    importReactFundamentalsView,
+    importReduxView,
+    importResponsiveView,
+    importStateManagementView,
+    importTailwindView,
+    importTanstackQueryView,
+    importTestingView,
+    importTsJsFundamentalsView,
+    importUiHubView,
+    importZustandView,
+    type ChunkImport,
+} from './route-chunks';
 import { RootLayout } from '../components/root-layout';
 
 /**
  * Each screen is lazy-loaded so the initial bundle ships only the shell + the
  * landing view; the rest are fetched on demand as separate chunks. The shared
- * <Suspense> boundary lives in <RootLayout/> around the <Outlet/>.
+ * <Suspense> boundary lives in <RootLayout/> around the <Outlet/>. Every
+ * dynamic import lives in route-chunks.ts so the route table, its router-level
+ * `lazy` companions, and the hover/focus prefetcher share one thunk per chunk.
  */
-const HomeView = lazy(() => import('../views/home/home_view'));
-const AboutView = lazy(() => import('../views/about/about_view'));
-const ReactFundamentalsView = lazy(() => import('../views/react_fundamentals/react_fundamentals_view'));
-const TsJsFundamentalsView = lazy(() => import('../views/ts_js_fundamentals/ts_js_fundamentals_view'));
-const LayoutStructureView = lazy(() => import('../views/ui_hub/sub_views/layout_structure/layout_structure_view'));
-const CssView = lazy(() => import('../views/ui_hub/sub_views/css/css_view'));
-const BootstrapView = lazy(() => import('../views/ui_hub/sub_views/bootstrap/bootstrap_view'));
-const TailwindView = lazy(() => import('../views/ui_hub/sub_views/tailwind/tailwind_view'));
-const InteractiveView = lazy(() => import('../views/ui_hub/sub_views/interactive/interactive_view'));
-const ResponsiveView = lazy(() => import('../views/ui_hub/sub_views/responsive/responsive_view'));
-const DesignSystemView = lazy(() => import('../views/ui_hub/sub_views/design_system/design_system_view'));
-const LifecycleView = lazy(() => import('../views/lifecycle/lifecycle_view'));
-const NavigationView = lazy(() => import('../views/navigation/navigation_view'));
-const StateManagementView = lazy(() => import('../views/state_management/state_management_view'));
-const HooksView = lazy(() => import('../views/state_management/hooks/hooks_view'));
-const ReduxView = lazy(() => import('../views/state_management/redux/redux_view'));
-const ZustandView = lazy(() => import('../views/state_management/zustand/zustand_view'));
-const TanstackQueryView = lazy(() => import('../views/state_management/tanstack_query/tanstack_query_view'));
-const ApiHandlingView = lazy(() => import('../views/api_handling/api_handling_view'));
-const DatabaseHandlingView = lazy(() => import('../views/database_handling/database_handling_view'));
-const ExceptionHandlingView = lazy(() => import('../views/exception_handling/exception_handling_view'));
-const DependencyManagementView = lazy(() => import('../views/dependency_management/dependency_management_view'));
-const ArchitectureView = lazy(() => import('../views/architecture/architecture_view'));
-const TestingView = lazy(() => import('../views/testing/testing_view'));
-const DebuggingView = lazy(() => import('../views/debugging/debugging_view'));
-const EnvironmentsView = lazy(() => import('../views/environments/environments_view'));
-const BestPracticesView = lazy(() => import('../views/best_practices/best_practices_view'));
-const UiHubView = lazy(() => import('../views/ui_hub/ui_hub_view'));
+const HomeView = lazy(importHomeView);
+const AboutView = lazy(importAboutView);
+const ReactFundamentalsView = lazy(importReactFundamentalsView);
+const TsJsFundamentalsView = lazy(importTsJsFundamentalsView);
+const LayoutStructureView = lazy(importLayoutStructureView);
+const CssView = lazy(importCssView);
+const BootstrapView = lazy(importBootstrapView);
+const TailwindView = lazy(importTailwindView);
+const InteractiveView = lazy(importInteractiveView);
+const ResponsiveView = lazy(importResponsiveView);
+const DesignSystemView = lazy(importDesignSystemView);
+const LifecycleView = lazy(importLifecycleView);
+const NavigationView = lazy(importNavigationView);
+const StateManagementView = lazy(importStateManagementView);
+const HooksView = lazy(importHooksView);
+const ReduxView = lazy(importReduxView);
+const ZustandView = lazy(importZustandView);
+const TanstackQueryView = lazy(importTanstackQueryView);
+const ApiHandlingView = lazy(importApiHandlingView);
+const DatabaseHandlingView = lazy(importDatabaseHandlingView);
+const ExceptionHandlingView = lazy(importExceptionHandlingView);
+const DependencyManagementView = lazy(importDependencyManagementView);
+const ArchitectureView = lazy(importArchitectureView);
+const TestingView = lazy(importTestingView);
+const DebuggingView = lazy(importDebuggingView);
+const EnvironmentsView = lazy(importEnvironmentsView);
+const BestPracticesView = lazy(importBestPracticesView);
+const UiHubView = lazy(importUiHubView);
+
+/**
+ * Router-level `lazy` companion for a React.lazy route element, built from the
+ * same chunk thunk. The router awaits the chunk while navigating, which keeps
+ * `useNavigation().state === 'loading'` true for the whole fetch — the top
+ * progress bar in <RootLayout/> appears immediately — and delays committing
+ * the new location until the chunk arrives, so the old view stays on screen
+ * with feedback instead of freezing after an instant URL change. It returns no
+ * route properties: the React.lazy element remains the render path and the
+ * shared <Suspense> still covers initial loads (the hydration navigation does
+ * not surface a loading state). After the first resolution the router clears
+ * `lazy`, so repeat visits commit instantly with no bar.
+ */
+function routeChunk(importChunk: ChunkImport): NonNullable<RouteObject['lazy']> {
+    return () => importChunk().then(() => ({}));
+}
 
 /**
  * Route table as data — mirrors the Flutter `router.dart` GoRouter config.
@@ -58,11 +107,13 @@ const layoutChildren: RouteObject[] = [
     {
         path: RoutePaths.home,
         element: <HomeView />,
+        lazy: routeChunk(importHomeView),
         handle: { title: "React developer's guide" },
     },
     {
         path: RoutePaths.about,
         element: <AboutView />,
+        lazy: routeChunk(importAboutView),
         handle: { title: 'About' },
     },
 
@@ -70,53 +121,73 @@ const layoutChildren: RouteObject[] = [
     {
         path: RoutePaths.reactFundamentals,
         element: <ReactFundamentalsView />,
+        lazy: routeChunk(importReactFundamentalsView),
         handle: { title: 'React fundamentals' },
     },
     {
         path: RoutePaths.tsJsFundamentals,
         element: <TsJsFundamentalsView />,
+        lazy: routeChunk(importTsJsFundamentalsView),
         handle: { title: 'TypeScript / JavaScript fundamentals' },
     },
-    { path: RoutePaths.ui, element: <UiHubView />, handle: { title: 'UI' } },
+    {
+        path: RoutePaths.ui,
+        element: <UiHubView />,
+        lazy: routeChunk(importUiHubView),
+        handle: { title: 'UI' },
+    },
     {
         path: RoutePaths.layoutStructure,
         element: <LayoutStructureView />,
+        lazy: routeChunk(importLayoutStructureView),
         handle: { title: 'Layout and structure' },
     },
-    { path: RoutePaths.css, element: <CssView />, handle: { title: 'CSS' } },
+    {
+        path: RoutePaths.css,
+        element: <CssView />,
+        lazy: routeChunk(importCssView),
+        handle: { title: 'CSS' },
+    },
     {
         path: RoutePaths.bootstrap,
         element: <BootstrapView />,
+        lazy: routeChunk(importBootstrapView),
         handle: { title: 'Bootstrap' },
     },
     {
         path: RoutePaths.tailwind,
         element: <TailwindView />,
+        lazy: routeChunk(importTailwindView),
         handle: { title: 'Tailwind' },
     },
     {
         path: RoutePaths.interactive,
         element: <InteractiveView />,
+        lazy: routeChunk(importInteractiveView),
         handle: { title: 'Interactive behaviours' },
     },
     {
         path: RoutePaths.responsive,
         element: <ResponsiveView />,
+        lazy: routeChunk(importResponsiveView),
         handle: { title: 'Responsive layout' },
     },
     {
         path: RoutePaths.designSystem,
         element: <DesignSystemView />,
+        lazy: routeChunk(importDesignSystemView),
         handle: { title: 'Design system' },
     },
     {
         path: RoutePaths.lifecycle,
         element: <LifecycleView />,
+        lazy: routeChunk(importLifecycleView),
         handle: { title: 'Lifecycle' },
     },
     {
         path: RoutePaths.navigation,
         element: <NavigationView />,
+        lazy: routeChunk(importNavigationView),
         handle: { title: 'Navigation and routing' },
     },
 
@@ -124,41 +195,49 @@ const layoutChildren: RouteObject[] = [
     {
         path: RoutePaths.stateManagement,
         element: <StateManagementView />,
+        lazy: routeChunk(importStateManagementView),
         handle: { title: 'State management' },
     },
     {
         path: RoutePaths.hooks,
         element: <HooksView />,
+        lazy: routeChunk(importHooksView),
         handle: { title: 'State management — Hooks' },
     },
     {
         path: RoutePaths.redux,
         element: <ReduxView />,
+        lazy: routeChunk(importReduxView),
         handle: { title: 'State management — Redux' },
     },
     {
         path: RoutePaths.zustand,
         element: <ZustandView />,
+        lazy: routeChunk(importZustandView),
         handle: { title: 'State management — Zustand' },
     },
     {
         path: RoutePaths.tanstackQuery,
         element: <TanstackQueryView />,
+        lazy: routeChunk(importTanstackQueryView),
         handle: { title: 'State management — TanStack Query' },
     },
     {
         path: RoutePaths.apiHandling,
         element: <ApiHandlingView />,
+        lazy: routeChunk(importApiHandlingView),
         handle: { title: 'API handling' },
     },
     {
         path: RoutePaths.databaseHandling,
         element: <DatabaseHandlingView />,
+        lazy: routeChunk(importDatabaseHandlingView),
         handle: { title: 'Database handling' },
     },
     {
         path: RoutePaths.exceptionHandling,
         element: <ExceptionHandlingView />,
+        lazy: routeChunk(importExceptionHandlingView),
         handle: { title: 'Exception handling' },
     },
 
@@ -166,31 +245,37 @@ const layoutChildren: RouteObject[] = [
     {
         path: RoutePaths.dependencyManagement,
         element: <DependencyManagementView />,
+        lazy: routeChunk(importDependencyManagementView),
         handle: { title: 'Dependency management' },
     },
     {
         path: RoutePaths.architecture,
         element: <ArchitectureView />,
+        lazy: routeChunk(importArchitectureView),
         handle: { title: 'Architecture' },
     },
     {
         path: RoutePaths.testing,
         element: <TestingView />,
+        lazy: routeChunk(importTestingView),
         handle: { title: 'Testing' },
     },
     {
         path: RoutePaths.debugging,
         element: <DebuggingView />,
+        lazy: routeChunk(importDebuggingView),
         handle: { title: 'Debugging' },
     },
     {
         path: RoutePaths.environments,
         element: <EnvironmentsView />,
+        lazy: routeChunk(importEnvironmentsView),
         handle: { title: 'Environments / Flavours' },
     },
     {
         path: RoutePaths.bestPractices,
         element: <BestPracticesView />,
+        lazy: routeChunk(importBestPracticesView),
         handle: { title: 'Best practices' },
     },
 ];
