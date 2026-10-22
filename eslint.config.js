@@ -6,7 +6,10 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // e2e/ is a self-contained Playwright package (own package-lock, outside
+  // every tsconfig include) — the app's type-aware projectService ruleset
+  // cannot resolve it, so it is ignored here, not linted by the app config.
+  globalIgnores(['dist', 'e2e']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

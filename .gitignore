@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright E2E artifacts (e2e/node_modules is covered by node_modules above).
+# NOTE: .docker/.env is deliberately committed (IMAGE_TAG=ci interpolation
+# default — not a secret); do not add a blanket .env rule without a negation.
+e2e/test-results/
+e2e/playwright-report/

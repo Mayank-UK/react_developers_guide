@@ -19,7 +19,17 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Drop privileges: nginx listens on the unprivileged port 8080 so the whole
 # process can run as the non-root `nginx` user (no privileged port binding).
-RUN chown -R nginx:nginx /usr/share/nginx/html
+# Non-root prep, while this RUN still has root — a non-root master cannot
+# create these itself (stock image leaves them root-owned):
+# - the five temp/cache dirs nginx mkdirs at startup;
+# - the pid file moves to /tmp (world-writable); /var/run stays root-owned;
+# - the static tree is owned by `nginx` (the stock entrypoint skips its
+#   default chown when it is not root).
+RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \
+        /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp \
+        /var/cache/nginx/scgi_temp \
+    && chown -R nginx:nginx /var/cache/nginx /usr/share/nginx/html \
+    && sed -i 's|pid  */\(var/\)\?run/nginx\.pid|pid /tmp/nginx.pid|' /etc/nginx/nginx.conf
 
 USER nginx
 
