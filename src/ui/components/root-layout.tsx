@@ -11,6 +11,7 @@ import { ThemeToggle } from './theme-toggle';
 import { useRouteTitle } from '../hooks/use-route-title';
 import { RoutePaths } from '../routing/routes';
 import { preloadRouteChunks } from '../routing/route-chunks';
+import { initAnalytics, trackEvent } from '../analytics/analytics';
 
 /**
  * RootLayout — the single shared app shell: a header (home link + current page
@@ -42,6 +43,32 @@ export function RootLayout() {
     useRouteChunkPreload();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+    // Umami beacon: injected once per document from the app shell's mount
+    // effect. Idempotent (StrictMode's dev double-mount and remounts never
+    // stack a second script) and a complete no-op when the env vars are
+    // unset — dev, test, and CI builds without the build args never see a
+    // script tag.
+    useEffect(() => {
+        initAnalytics();
+    }, []);
+
+    // Analytics: one topic-open per topic view activation. The effect keys
+    // on the pathname, so a deep link, a refresh, and an in-app navigation
+    // each report exactly once — RootLayout mounts once per session (only
+    // its pathname changes afterwards), and react-router hands it the final
+    // location on mount, so there is no transient value to double-fire on.
+    // Home is the guide index and About is app chrome — neither is a topic.
+    // A no-op in unconfigured builds.
+    useEffect(() => {
+        if (
+            location.pathname === RoutePaths.home ||
+            location.pathname === RoutePaths.about
+        ) {
+            return;
+        }
+        trackEvent('topic-open', { topic: location.pathname });
+    }, [location.pathname]);
 
     // Show the back arrow everywhere except home (so About, reached from the
     // header, always has a way back to where the user came from).

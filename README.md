@@ -11,6 +11,25 @@ Currently, two official plugins are available:
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
+## Analytics
+
+Traffic is measured with self-hosted [Umami](https://umami.is) at https://umami.mayankcodeworks.com — no cookies, no personal data.
+
+Analytics is env-gated: it exists only when BOTH `VITE_UMAMI_SRC` and `VITE_UMAMI_ID` are non-empty at build time. They are passed as Docker build-args from the `VITE_UMAMI_*` GitHub repository variables (never committed to the repo), so local dev, tests, and CI builds without the vars run with analytics completely disabled — no script tag is injected and nothing is sent.
+
+Events:
+
+| Event        | Property | Fires when                                                                               |
+| ------------ | -------- | ---------------------------------------------------------------------------------------- |
+| `topic-open` | `topic`  | a guide topic/section view opens — route path; covers in-app navigation, direct links, and refreshes |
+| `copy-code`  | `topic`  | a code example's copy button succeeds — route path of the page the block sits on          |
+
+UTM convention for links pointing at https://reactdevelopersguide.mayankcodeworks.com (Umami parses `utm_*` query params automatically): `utm_source` = where the link lives, `utm_medium` = the kind of placement (`readme` \| `post` \| `social`). Examples:
+
+- `https://reactdevelopersguide.mayankcodeworks.com/?utm_source=github&utm_medium=readme`
+- `https://reactdevelopersguide.mayankcodeworks.com/?utm_source=reddit&utm_medium=post`
+- `https://reactdevelopersguide.mayankcodeworks.com/?utm_source=dev.to&utm_medium=post`
+
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:

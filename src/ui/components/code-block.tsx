@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { trackEvent } from '../analytics/analytics';
 
 interface CodeBlockProps {
   code: string;
@@ -33,6 +34,11 @@ export function CodeBlock({ code, language, caption, defaultOpen = false }: Code
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(code);
+      // Analytics: only actual copies are counted (the write resolved). The
+      // topic is the current route path — the same identifier topic-open
+      // uses, so the two events join per topic in the dashboard. A no-op in
+      // unconfigured builds.
+      trackEvent('copy-code', { topic: window.location.pathname });
       setCopied(true);
       if (resetTimer.current !== undefined) window.clearTimeout(resetTimer.current);
       resetTimer.current = window.setTimeout(() => setCopied(false), 1500);
