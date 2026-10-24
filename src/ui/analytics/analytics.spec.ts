@@ -88,9 +88,11 @@ describe('analytics', () => {
             vi.stubEnv('VITE_UMAMI_ID', ID);
             initAnalytics();
 
-            // Two events queue during the cold window…
-            trackEvent('topic-open', { topic: '/state-management' });
-            trackEvent('copy-code', { topic: '/state-management' });
+            // Two events queue during the cold window… (path unique to this
+            // test: the topic-open dedupe guard is module-level state and
+            // would otherwise swallow a path another test already fired.)
+            trackEvent('topic-open', { topic: '/navigation-routing' });
+            trackEvent('copy-code', { topic: '/navigation-routing' });
 
             // …then the beacon evaluates (jsdom never runs it, so simulate
             // its load event) and its global exists.
@@ -99,10 +101,10 @@ describe('analytics', () => {
 
             expect(track).toHaveBeenCalledTimes(2);
             expect(track).toHaveBeenNthCalledWith(1, 'topic-open', {
-                topic: '/state-management',
+                topic: '/navigation-routing',
             });
             expect(track).toHaveBeenNthCalledWith(2, 'copy-code', {
-                topic: '/state-management',
+                topic: '/navigation-routing',
             });
         });
 
@@ -124,6 +126,60 @@ describe('analytics', () => {
             expect(track).toHaveBeenNthCalledWith(1, 'copy-code', {
                 topic: '/testing',
             });
+        });
+    });
+
+    describe('topic-open dedupe (layout-remount double-fire guard)', () => {
+        it('collapses a second topic-open for the same path within the window', () => {
+            vi.stubEnv('VITE_UMAMI_SRC', SRC);
+            vi.stubEnv('VITE_UMAMI_ID', ID);
+            const track = installUmami();
+
+            trackEvent('topic-open', { topic: '/environments' });
+            // The remount case: same path re-fired seconds later.
+            trackEvent('topic-open', { topic: '/environments' });
+
+            expect(track).toHaveBeenCalledTimes(1);
+            expect(track).toHaveBeenNthCalledWith(1, 'topic-open', {
+                topic: '/environments',
+            });
+        });
+
+        it('sends again for the same path once the window has passed', () => {
+            vi.stubEnv('VITE_UMAMI_SRC', SRC);
+            vi.stubEnv('VITE_UMAMI_ID', ID);
+            const track = installUmami();
+
+            vi.useFakeTimers({ toFake: ['Date'] });
+            vi.setSystemTime(new Date('2026-10-24T12:00:00Z'));
+            trackEvent('topic-open', { topic: '/best-practices' });
+            vi.setSystemTime(new Date('2026-10-24T12:00:31Z'));
+            trackEvent('topic-open', { topic: '/best-practices' });
+            vi.useRealTimers();
+
+            expect(track).toHaveBeenCalledTimes(2);
+        });
+
+        it('does not suppress different paths in the same window', () => {
+            vi.stubEnv('VITE_UMAMI_SRC', SRC);
+            vi.stubEnv('VITE_UMAMI_ID', ID);
+            const track = installUmami();
+
+            trackEvent('topic-open', { topic: '/dependency-management' });
+            trackEvent('topic-open', { topic: '/exception-handling' });
+
+            expect(track).toHaveBeenCalledTimes(2);
+        });
+
+        it('never suppresses repeated copy-code (guard is topic-open only)', () => {
+            vi.stubEnv('VITE_UMAMI_SRC', SRC);
+            vi.stubEnv('VITE_UMAMI_ID', ID);
+            const track = installUmami();
+
+            trackEvent('copy-code', { topic: '/architecture' });
+            trackEvent('copy-code', { topic: '/architecture' });
+
+            expect(track).toHaveBeenCalledTimes(2);
         });
     });
 
