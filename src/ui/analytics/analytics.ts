@@ -119,11 +119,7 @@ function getDistinctId(): string | undefined {
         const id =
             typeof crypto.randomUUID === 'function'
                 ? crypto.randomUUID()
-                : 'v-' +
-                  Date.now() +
-                  '-' +
-                  Math.random().toString(36).slice(2) +
-                  Math.random().toString(36).slice(2);
+                : `v-${Date.now()}-${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
         localStorage.setItem(VISITOR_ID_STORAGE_KEY, id);
         return id;
     } catch {
