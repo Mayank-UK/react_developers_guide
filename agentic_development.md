@@ -122,3 +122,4 @@
     - Wiring: root Vite SPA; VITE_UMAMI_* Dockerfile ARG/ENV + ci build-args (e2e + build-push); demo-run skipped (demos auto-mount).
 
 - Umami visitor identity (2026-10-25) — beacon now carries data-distinct-id: stable per-browser visitor id for IP-churn dedupe (localStorage 'mcw_vid'; crypto.randomUUID + non-secure-context fallback; ALL storage access guarded — beacon fires id-less when storage is blocked; attribute set BEFORE append so the tracker auto-identifies at script evaluation; no manual umami.identify, VITE_UMAMI_* gating untouched). Verified: npm run build green + dist bundle grep (mcw_vid + data-distinct-id present), analytics spec 11/11; runtime identify check pending post-deploy.
+- Ops 2026-10-25: favicon.ico shipped for Umami dashboard cards (nginx root); react master was lint-red (restrict-plus-operands in analytics visitor-id fallback) — fixed at 5b8b341, CI+deploy green again.
