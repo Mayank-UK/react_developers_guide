@@ -12,6 +12,7 @@ import { useRouteTitle } from '../hooks/use-route-title';
 import { RoutePaths } from '../routing/routes';
 import { preloadRouteChunks } from '../routing/route-chunks';
 import { initAnalytics, trackEvent } from '../analytics/analytics';
+import { initCrashTelemetry } from '../analytics/crash-telemetry';
 
 /**
  * RootLayout — the single shared app shell: a header (home link + current page
@@ -44,13 +45,15 @@ export function RootLayout() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const hamburgerRef = useRef<HTMLButtonElement>(null);
 
-    // Umami beacon: injected once per document from the app shell's mount
-    // effect. Idempotent (StrictMode's dev double-mount and remounts never
-    // stack a second script) and a complete no-op when the env vars are
-    // unset — dev, test, and CI builds without the build args never see a
-    // script tag.
+    // Umami analytics beacon (see ui/analytics/analytics.ts) and the Faro
+    // crash-telemetry beacon (see ui/analytics/crash-telemetry.ts): shell-level
+    // so they load once per document for EVERY route. Idempotent (StrictMode's
+    // dev double-mount and remounts never stack a second script) and a complete
+    // no-op unless the build baked both VITE_UMAMI_* / VITE_FARO_* vars in —
+    // dev, test, and CI builds without the build args never see a script tag.
     useEffect(() => {
         initAnalytics();
+        initCrashTelemetry();
     }, []);
 
     // Analytics: one topic-open per topic view activation. The effect keys

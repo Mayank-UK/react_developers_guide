@@ -11,6 +11,14 @@ ARG VITE_UMAMI_ID=""
 ENV VITE_UMAMI_SRC=$VITE_UMAMI_SRC
 ENV VITE_UMAMI_ID=$VITE_UMAMI_ID
 
+# Grafana Faro crash telemetry (PUBLIC values — same discipline as the Umami
+# block above). Empty defaults (= unset) keep the beacon a complete no-op:
+# no script tag injected, nothing initialized.
+ARG VITE_FARO_URL=""
+ARG VITE_FARO_APP=""
+ENV VITE_FARO_URL=$VITE_FARO_URL
+ENV VITE_FARO_APP=$VITE_FARO_APP
+
 WORKDIR /app
 
 COPY package*.json ./
